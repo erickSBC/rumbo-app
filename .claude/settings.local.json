@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npx --yes create-next-app@latest frontend --ts --app --src-dir --tailwind --eslint --import-alias \"@/*\" --use-npm --no-turbopack --yes)",
+      "Bash(cp \"/c/Users/ASUS X515EA/Documents/rumboapp-264ca-firebase-adminsdk-fbsvc-2ecddc2e81.json\" /d/RumboApp/backend/serviceAccountKey.json && echo \"service account copied\" && ls -la /d/RumboApp/backend/serviceAccountKey.json)",
+      "Bash(npm install *)",
+      "Bash(npm run *)",
+      "Bash(node -p \"require\\('next/package.json'\\).version\")",
+      "Bash(ls node_modules/next/dist/docs/)",
+      "Bash(touch src/modules/auth/.gitkeep src/modules/flota/.gitkeep src/modules/ventas/.gitkeep src/modules/ia/.gitkeep src/middleware/.gitkeep)",
+      "Bash(curl -s http://localhost:4000/health)",
+      "Bash(curl -s http://localhost:4000/api/planes)",
+      "Bash(curl -s http://localhost:3000)"
+    ]
+  }
+}

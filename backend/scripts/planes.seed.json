@@ -1,0 +1,29 @@
+[
+  {
+    "id": "ruta",
+    "nombre": "Ruta",
+    "precioMensual": 149,
+    "precioAnual": 1490,
+    "maxBuses": 5,
+    "maxUsuarios": 3,
+    "asistenteIA": false
+  },
+  {
+    "id": "flota",
+    "nombre": "Flota",
+    "precioMensual": 399,
+    "precioAnual": 3990,
+    "maxBuses": 25,
+    "maxUsuarios": 15,
+    "asistenteIA": true
+  },
+  {
+    "id": "terminal",
+    "nombre": "Terminal",
+    "precioMensual": 899,
+    "precioAnual": 8990,
+    "maxBuses": 9999,
+    "maxUsuarios": 9999,
+    "asistenteIA": true
+  }
+]

@@ -1,0 +1,16 @@
+# Dependencias
+node_modules/
+
+# Build
+dist/
+
+# Variables de entorno y SECRETOS — nunca commitear
+.env
+.env.local
+serviceAccountKey.json
+*serviceAccount*.json
+*-firebase-adminsdk-*.json
+
+# Logs
+*.log
+npm-debug.log*

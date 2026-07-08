@@ -1,0 +1,23 @@
+# Dependencias
+node_modules/
+
+# Builds
+dist/
+.next/
+out/
+
+# Entornos y SECRETOS — nunca commitear
+.env
+.env.local
+.env*.local
+serviceAccountKey.json
+*serviceAccount*.json
+*-firebase-adminsdk-*.json
+
+# Logs
+*.log
+npm-debug.log*
+
+# SO / editor
+.DS_Store
+*.tsbuildinfo

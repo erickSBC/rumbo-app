@@ -1,0 +1,23 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Catálogo de planes: lectura pública; escritura solo del superadmin.
+    match /planes/{planId} {
+      allow read: if true;
+      allow write: if request.auth.token.isSuperAdmin == true;
+    }
+
+    // Empresas: el tenant lee la suya; el superadmin lee todas.
+    match /empresas/{empresaId} {
+      allow read: if request.auth.token.empresaId == empresaId
+                  || request.auth.token.isSuperAdmin == true;
+    }
+
+    // Resto de colecciones operativas: aislamiento por empresaId.
+    match /{coleccion}/{docId} {
+      allow read, write: if request.auth != null
+                         && resource.data.empresaId == request.auth.token.empresaId;
+    }
+  }
+}
