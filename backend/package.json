@@ -9,18 +9,27 @@
     "build": "tsc",
     "start": "node dist/index.js",
     "seed:planes": "tsx scripts/seed-planes.ts",
+    "seed:datos": "tsx scripts/seed-datos.ts",
+    "test:registro": "tsx scripts/test-registro.ts",
+    "test:limites": "tsx scripts/test-limites.ts",
+    "test:salidas": "tsx scripts/test-salidas.ts",
+    "test:mapa": "tsx scripts/test-mapa.ts",
+    "test:venta": "tsx scripts/test-venta.ts",
+    "test:dia7": "tsx scripts/test-dia7.ts",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
     "express": "^4.21.2",
-    "firebase-admin": "^13.0.2"
+    "firebase-admin": "^13.0.2",
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "@types/cors": "^2.8.17",
     "@types/express": "^5.0.0",
     "@types/node": "^22.10.5",
+    "firebase": "^12.15.0",
     "tsx": "^4.19.2",
     "typescript": "^5.7.3"
   }

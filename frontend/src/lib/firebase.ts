@@ -9,6 +9,7 @@
  */
 import { initializeApp, getApps, getApp, type FirebaseApp } from "firebase/app";
 import { getAuth, type Auth } from "firebase/auth";
+import { getFirestore, type Firestore } from "firebase/firestore";
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -23,3 +24,8 @@ const firebaseConfig = {
 export const firebaseApp: FirebaseApp = getApps().length ? getApp() : initializeApp(firebaseConfig);
 
 export const auth: Auth = getAuth(firebaseApp);
+
+// Firestore del lado cliente: se usa para lecturas en tiempo real (onSnapshot),
+// p. ej. la ocupación del mapa de asientos (§5.4). El aislamiento lo garantizan
+// las reglas del Anexo C.
+export const db: Firestore = getFirestore(firebaseApp);

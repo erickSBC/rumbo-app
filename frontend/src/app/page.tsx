@@ -1,3 +1,4 @@
+import Link from "next/link";
 import type { Plan } from "@/types/domain";
 
 /**
@@ -29,6 +30,12 @@ export default async function Home() {
   return (
     <main className="min-h-screen bg-slate-50 text-slate-900">
       <section className="mx-auto max-w-5xl px-6 py-16">
+        <nav className="mb-8 flex justify-end">
+          <Link href="/login" className="text-sm font-medium text-slate-700 hover:text-slate-900">
+            Iniciar sesión →
+          </Link>
+        </nav>
+
         <header className="text-center">
           <h1 className="text-4xl font-bold tracking-tight">Rumbo</h1>
           <p className="mt-3 text-lg text-slate-600">
@@ -68,13 +75,12 @@ export default async function Home() {
                   </li>
                 </ul>
 
-                <button
-                  className="mt-8 rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-700 disabled:opacity-60"
-                  disabled
-                  title="El registro se habilita en el Día 2"
+                <Link
+                  href={`/registro?plan=${plan.id}`}
+                  className="mt-8 rounded-lg bg-slate-900 px-4 py-2 text-center text-sm font-medium text-white hover:bg-slate-700"
                 >
                   Empezar prueba de 14 días
-                </button>
+                </Link>
               </article>
             ))}
           </div>

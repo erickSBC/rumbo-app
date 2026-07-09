@@ -6,6 +6,13 @@
 import express, { type Express } from "express";
 import cors from "cors";
 import planesRouter from "./modules/planes/planes.routes.js";
+import authRouter from "./modules/auth/auth.routes.js";
+import rutasRouter from "./modules/rutas/rutas.routes.js";
+import busesRouter from "./modules/flota/buses.routes.js";
+import usuariosRouter from "./modules/usuarios/usuarios.routes.js";
+import salidasRouter from "./modules/salidas/salidas.routes.js";
+import ventasRouter from "./modules/ventas/ventas.routes.js";
+import reportesRouter from "./modules/reportes/reportes.routes.js";
 
 export function createApp(): Express {
   const app = express();
@@ -26,8 +33,14 @@ export function createApp(): Express {
 
   // Módulos de dominio.
   app.use("/api/planes", planesRouter);
-  // Próximos días: /api/auth, /api/rutas, /api/buses, /api/salidas,
-  // /api/pasajes, /api/ai — cada uno en su carpeta de src/modules.
+  app.use("/api/auth", authRouter);
+  app.use("/api/rutas", rutasRouter);
+  app.use("/api/buses", busesRouter);
+  app.use("/api/usuarios", usuariosRouter);
+  app.use("/api/salidas", salidasRouter);
+  app.use("/api/pasajes", ventasRouter);
+  app.use("/api/reportes", reportesRouter);
+  // Próximos días: /api/ai — en su carpeta de src/modules.
 
   return app;
 }

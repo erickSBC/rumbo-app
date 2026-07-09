@@ -10,7 +10,11 @@
       "Bash(touch src/modules/auth/.gitkeep src/modules/flota/.gitkeep src/modules/ventas/.gitkeep src/modules/ia/.gitkeep src/middleware/.gitkeep)",
       "Bash(curl -s http://localhost:4000/health)",
       "Bash(curl -s http://localhost:4000/api/planes)",
-      "Bash(curl -s http://localhost:3000)"
+      "Bash(curl -s http://localhost:3000)",
+      "Bash(npx tsc *)",
+      "Bash(GOOGLE_APPLICATION_CREDENTIALS=backend/serviceAccountKey.json npx -y firebase-tools deploy --only firestore:rules --project rumboapp-264ca)",
+      "Bash(npx tsx *)",
+      "WebSearch"
     ]
   }
 }
