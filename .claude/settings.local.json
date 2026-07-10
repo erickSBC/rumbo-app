@@ -14,7 +14,12 @@
       "Bash(npx tsc *)",
       "Bash(GOOGLE_APPLICATION_CREDENTIALS=backend/serviceAccountKey.json npx -y firebase-tools deploy --only firestore:rules --project rumboapp-264ca)",
       "Bash(npx tsx *)",
-      "WebSearch"
+      "WebSearch",
+      "Bash(GEMINI_API_KEY=clave-invalida-simulada npx tsx src/index.ts)",
+      "Bash(MODO=fallo npm run test:ia)",
+      "Bash(gcloud --version)",
+      "Bash(docker --version)",
+      "Bash(npx --no-install firebase-tools --version)"
     ]
   }
 }

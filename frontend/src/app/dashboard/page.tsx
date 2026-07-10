@@ -78,14 +78,22 @@ export default function DashboardPage() {
         </div>
 
         {/* Banner del plan elegido y días de prueba restantes (§4.4 paso 12). */}
-        <div className="mt-6 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-          <p className="text-sm text-slate-500">Tu plan</p>
-          <p className="text-xl font-semibold capitalize">{empresa.planId}</p>
-          {empresa.estado === "prueba" && empresa.diasPruebaRestantes !== null && (
-            <p className="mt-2 inline-block rounded-full bg-amber-100 px-3 py-1 text-sm text-amber-800">
-              Prueba: te quedan {empresa.diasPruebaRestantes} días
-            </p>
-          )}
+        <div className="mt-6 flex items-center justify-between rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+          <div>
+            <p className="text-sm text-slate-500">Tu plan</p>
+            <p className="text-xl font-semibold capitalize">{empresa.planId}</p>
+            {empresa.estado === "prueba" && empresa.diasPruebaRestantes !== null && (
+              <p className="mt-2 inline-block rounded-full bg-amber-100 px-3 py-1 text-sm text-amber-800">
+                Prueba: te quedan {empresa.diasPruebaRestantes} días
+              </p>
+            )}
+          </div>
+          <a
+            href="/dashboard/plan"
+            className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium hover:border-slate-900"
+          >
+            Cambiar de plan
+          </a>
         </div>
 
         <nav className="mt-6 grid gap-3 sm:grid-cols-2">
@@ -94,6 +102,7 @@ export default function DashboardPage() {
           <NavCard href="/dashboard/usuarios" titulo="Usuarios" desc="Vendedores del counter" />
           <NavCard href="/dashboard/salidas" titulo="Salidas" desc="Programación de salidas" />
           <NavCard href="/dashboard/reporte" titulo="Reporte del día" desc="Ventas y montos de hoy" />
+          <NavCard href="/dashboard/asistente" titulo="Asistente IA" desc="Pregunta sobre tu operación" />
         </nav>
 
         <dl className="mt-6 grid gap-4 sm:grid-cols-2">

@@ -13,6 +13,9 @@ import usuariosRouter from "./modules/usuarios/usuarios.routes.js";
 import salidasRouter from "./modules/salidas/salidas.routes.js";
 import ventasRouter from "./modules/ventas/ventas.routes.js";
 import reportesRouter from "./modules/reportes/reportes.routes.js";
+import iaRouter from "./modules/ia/ia.routes.js";
+import empresasRouter from "./modules/empresas/empresas.routes.js";
+import superadminRouter from "./modules/superadmin/superadmin.routes.js";
 
 export function createApp(): Express {
   const app = express();
@@ -40,7 +43,9 @@ export function createApp(): Express {
   app.use("/api/salidas", salidasRouter);
   app.use("/api/pasajes", ventasRouter);
   app.use("/api/reportes", reportesRouter);
-  // Próximos días: /api/ai — en su carpeta de src/modules.
+  app.use("/api/ai", iaRouter);
+  app.use("/api/empresa", empresasRouter);
+  app.use("/api/superadmin", superadminRouter);
 
   return app;
 }

@@ -27,7 +27,8 @@ export default function LoginPage() {
       const cred = await signInWithEmailAndPassword(auth, email, password);
       // Refresca el token para asegurar claims al día antes de entrar.
       await cred.user.getIdToken(true);
-      router.push("/dashboard");
+      const { claims } = await cred.user.getIdTokenResult();
+      router.push(claims.isSuperAdmin === true ? "/superadmin" : "/dashboard");
     } catch {
       setError("Correo o contraseña incorrectos.");
       setEnviando(false);

@@ -10,12 +10,15 @@
     "start": "node dist/index.js",
     "seed:planes": "tsx scripts/seed-planes.ts",
     "seed:datos": "tsx scripts/seed-datos.ts",
+    "seed:superadmin": "tsx scripts/seed-superadmin.ts",
+    "test:dia9": "tsx scripts/test-dia9.ts",
     "test:registro": "tsx scripts/test-registro.ts",
     "test:limites": "tsx scripts/test-limites.ts",
     "test:salidas": "tsx scripts/test-salidas.ts",
     "test:mapa": "tsx scripts/test-mapa.ts",
     "test:venta": "tsx scripts/test-venta.ts",
     "test:dia7": "tsx scripts/test-dia7.ts",
+    "test:ia": "tsx scripts/test-ia.ts",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
