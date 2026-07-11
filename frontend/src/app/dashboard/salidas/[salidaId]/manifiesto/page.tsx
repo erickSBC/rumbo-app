@@ -14,11 +14,6 @@ interface Manifiesto {
   totalPasajeros: number;
 }
 
-/**
- * Manifiesto electrónico (RF-13): vista imprimible desde el navegador.
- * Contenido mínimo SUTRAN/MTC (§3.3): datos del vehículo, chofer y relación de
- * pasajeros con documento. Solo pasajes con estado "vendido".
- */
 export default function ManifiestoPage() {
   const router = useRouter();
   const params = useParams<{ salidaId: string }>();
@@ -40,8 +35,8 @@ export default function ManifiestoPage() {
     return () => unsub();
   }, [router, params.salidaId]);
 
-  if (error) return <main className="p-10 text-red-600">Error: {error}</main>;
-  if (!m) return <main className="p-10 text-slate-500">Cargando…</main>;
+  if (error) return <main className="flex min-h-screen items-center justify-center bg-canvas"><p className="rounded-lg bg-danger-subtle px-4 py-3 text-sm text-danger">{error}</p></main>;
+  if (!m) return <main className="flex min-h-screen items-center justify-center bg-canvas"><p className="text-sm text-ink-muted">Cargando…</p></main>;
 
   const fecha = new Date(m.salida.fechaHora).toLocaleString("es-PE", {
     timeZone: "America/Lima",
@@ -50,8 +45,7 @@ export default function ManifiestoPage() {
   });
 
   return (
-    <main className="min-h-screen bg-white text-slate-900">
-      {/* Estilos de impresión: solo se imprime el manifiesto, sin controles. */}
+    <main className="min-h-screen bg-surface text-ink">
       <style>{`
         @media print {
           .no-print { display: none !important; }
@@ -63,75 +57,80 @@ export default function ManifiestoPage() {
         <div className="no-print mb-6 flex items-center justify-between">
           <a
             href={`/dashboard/salidas/${params.salidaId}`}
-            className="text-sm text-slate-500 hover:underline"
+            className="text-sm text-ink-muted hover:text-primary hover:underline transition"
           >
             ← Volver al mapa
           </a>
           <button
             onClick={() => window.print()}
-            className="rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-700"
+            className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white hover:bg-primary-hover transition"
           >
             Imprimir
           </button>
         </div>
 
-        <header className="border-b-2 border-slate-900 pb-4">
-          <h1 className="text-xl font-bold uppercase">Manifiesto de pasajeros</h1>
-          <p className="text-sm text-slate-600">
+        <header className="border-b-2 border-ink pb-4">
+          <div className="flex items-center gap-3">
+            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary font-bold text-white text-sm">R</span>
+            <h1 className="text-xl font-bold uppercase">Manifiesto de pasajeros</h1>
+          </div>
+          <p className="mt-1 text-sm text-ink-secondary">
             {m.empresa.razonSocial} — RUC {m.empresa.ruc}
           </p>
         </header>
 
         <dl className="mt-4 grid grid-cols-2 gap-x-8 gap-y-1 text-sm">
-          <div className="flex justify-between border-b border-slate-200 py-1">
-            <dt className="text-slate-500">Ruta</dt>
+          <div className="flex justify-between border-b border-line py-1.5">
+            <dt className="text-ink-muted">Ruta</dt>
             <dd className="font-medium">
               {m.salida.rutaOrigen} → {m.salida.rutaDestino}
             </dd>
           </div>
-          <div className="flex justify-between border-b border-slate-200 py-1">
-            <dt className="text-slate-500">Fecha y hora</dt>
+          <div className="flex justify-between border-b border-line py-1.5">
+            <dt className="text-ink-muted">Fecha y hora</dt>
             <dd className="font-medium">{fecha}</dd>
           </div>
-          <div className="flex justify-between border-b border-slate-200 py-1">
-            <dt className="text-slate-500">Placa del vehículo</dt>
+          <div className="flex justify-between border-b border-line py-1.5">
+            <dt className="text-ink-muted">Placa del vehículo</dt>
             <dd className="font-medium">{m.salida.busPlaca}</dd>
           </div>
-          <div className="flex justify-between border-b border-slate-200 py-1">
-            <dt className="text-slate-500">Conductor</dt>
+          <div className="flex justify-between border-b border-line py-1.5">
+            <dt className="text-ink-muted">Conductor</dt>
             <dd className="font-medium">{m.salida.choferNombre}</dd>
           </div>
         </dl>
 
-        <table className="mt-6 w-full border-collapse text-sm">
-          <thead>
-            <tr className="border-b-2 border-slate-900 text-left">
-              <th className="py-2 pr-4 w-20">Asiento</th>
-              <th className="py-2 pr-4">Nombre del pasajero</th>
-              <th className="py-2 w-32">Documento</th>
-            </tr>
-          </thead>
-          <tbody>
-            {m.pasajeros.length === 0 ? (
-              <tr>
-                <td colSpan={3} className="py-4 text-slate-500">
-                  Sin pasajeros vendidos.
-                </td>
+        <div className="mt-6 overflow-x-auto">
+          <table className="w-full border-collapse text-sm">
+            <thead>
+              <tr className="border-b-2 border-ink text-left">
+                <th className="py-2 pr-4 w-20 text-xs font-semibold uppercase tracking-wide text-ink-muted">Asiento</th>
+                <th className="py-2 pr-4 text-xs font-semibold uppercase tracking-wide text-ink-muted">Nombre del pasajero</th>
+                <th className="py-2 w-32 text-xs font-semibold uppercase tracking-wide text-ink-muted">Documento</th>
               </tr>
-            ) : (
-              m.pasajeros.map((p) => (
-                <tr key={p.numAsiento} className="border-b border-slate-200">
-                  <td className="py-1.5 pr-4">{p.numAsiento}</td>
-                  <td className="py-1.5 pr-4">{p.pasajeroNombre}</td>
-                  <td className="py-1.5">{p.pasajeroDoc}</td>
+            </thead>
+            <tbody>
+              {m.pasajeros.length === 0 ? (
+                <tr>
+                  <td colSpan={3} className="py-4 text-ink-muted">
+                    Sin pasajeros vendidos.
+                  </td>
                 </tr>
-              ))
-            )}
-          </tbody>
-        </table>
+              ) : (
+                m.pasajeros.map((p) => (
+                  <tr key={p.numAsiento} className="border-b border-line">
+                    <td className="py-1.5 pr-4 tabular">{p.numAsiento}</td>
+                    <td className="py-1.5 pr-4">{p.pasajeroNombre}</td>
+                    <td className="py-1.5 tabular">{p.pasajeroDoc}</td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
 
-        <p className="mt-4 text-sm text-slate-600">
-          Total de pasajeros: <strong>{m.totalPasajeros}</strong>
+        <p className="mt-4 text-sm text-ink-secondary">
+          Total de pasajeros: <strong className="text-ink">{m.totalPasajeros}</strong>
         </p>
       </section>
     </main>

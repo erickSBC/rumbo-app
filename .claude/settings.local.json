@@ -19,7 +19,8 @@
       "Bash(MODO=fallo npm run test:ia)",
       "Bash(gcloud --version)",
       "Bash(docker --version)",
-      "Bash(npx --no-install firebase-tools --version)"
+      "Bash(npx --no-install firebase-tools --version)",
+      "Bash(echo \"=== git log reciente ===\" && git log --oneline -8 2>/dev/null; echo \"=== buscar skill frontend-design ===\" && find . -iname \"*frontend-design*\" -not -path \"*/node_modules/*\" 2>/dev/null; ls -d .claude/skills 2>/dev/null && ls .claude/skills 2>/dev/null; ls \"$HOME/.claude/skills\" 2>/dev/null | head; echo \"=== frontend estructura estilo ===\" && ls frontend/ && echo \"--- app ---\" && ls frontend/src/app/)"
     ]
   }
 }

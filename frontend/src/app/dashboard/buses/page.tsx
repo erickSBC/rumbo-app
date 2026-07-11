@@ -7,11 +7,6 @@ import { auth } from "@/lib/firebase";
 import { apiFetch } from "@/lib/api";
 import type { Bus, Uso } from "@/types/domain";
 
-/**
- * CRUD de buses (RF-08). Muestra el uso "X de Y buses" (RF-03, lado UI) leído
- * del backend. El límite real lo impone el backend: aquí solo se informa y, al
- * llegar al tope, se avisa amablemente sin bloquear por cuenta propia.
- */
 export default function BusesPage() {
   const router = useRouter();
   const [buses, setBuses] = useState<Bus[]>([]);
@@ -48,7 +43,6 @@ export default function BusesPage() {
       setNumAsientos("40");
       await cargar();
     } catch (e) {
-      // Aquí aterriza el mensaje de límite del backend (RF-03).
       setError((e as Error).message);
     }
   }
@@ -66,9 +60,9 @@ export default function BusesPage() {
   const enTope = uso ? uso.actual >= uso.max : false;
 
   return (
-    <main className="min-h-screen bg-slate-50 text-slate-900">
+    <main className="min-h-screen bg-canvas text-ink">
       <section className="mx-auto max-w-3xl px-6 py-10">
-        <a href="/dashboard" className="text-sm text-slate-500 hover:underline">
+        <a href="/dashboard" className="text-sm text-ink-muted hover:text-primary hover:underline transition">
           ← Volver al panel
         </a>
 
@@ -77,7 +71,7 @@ export default function BusesPage() {
           {uso && (
             <span
               className={`rounded-full px-3 py-1 text-sm font-medium ${
-                enTope ? "bg-amber-100 text-amber-800" : "bg-slate-100 text-slate-700"
+                enTope ? "bg-warning-subtle text-warning" : "bg-subtle text-ink-secondary"
               }`}
             >
               {uso.actual} de {uso.max} buses
@@ -86,24 +80,24 @@ export default function BusesPage() {
         </div>
 
         {enTope && (
-          <p className="mt-3 rounded-lg bg-amber-50 p-3 text-sm text-amber-800">
+          <p className="mt-3 rounded-lg bg-warning-subtle p-3 text-sm text-warning">
             Llegaste al límite de tu plan. Para agregar más buses, actualiza tu plan.
           </p>
         )}
 
-        <form onSubmit={crear} className="mt-6 flex flex-wrap items-end gap-3">
+        <form onSubmit={crear} className="mt-6 flex flex-wrap items-end gap-3 rounded-2xl border border-line bg-surface p-5">
           <label className="flex-1">
-            <span className="text-sm font-medium text-slate-700">Placa</span>
+            <span className="text-sm font-medium text-ink-secondary">Placa</span>
             <input
               value={placa}
               onChange={(e) => setPlaca(e.target.value.toUpperCase())}
               placeholder="ABC-123"
               required
-              className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+              className="mt-1.5 w-full rounded-lg border border-line-strong bg-surface px-3 py-2 text-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/30"
             />
           </label>
           <label className="w-32">
-            <span className="text-sm font-medium text-slate-700">Asientos</span>
+            <span className="text-sm font-medium text-ink-secondary">Asientos</span>
             <input
               type="number"
               value={numAsientos}
@@ -111,33 +105,33 @@ export default function BusesPage() {
               min={1}
               max={90}
               required
-              className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+              className="mt-1.5 w-full rounded-lg border border-line-strong bg-surface px-3 py-2 text-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/30"
             />
           </label>
           <button
             type="submit"
-            className="rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-700"
+            className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white hover:bg-primary-hover transition"
           >
             Agregar bus
           </button>
         </form>
 
-        {error && <p className="mt-3 text-sm text-red-600">{error}</p>}
+        {error && <p className="mt-3 rounded-lg bg-danger-subtle px-3 py-2 text-sm text-danger">{error}</p>}
 
-        <ul className="mt-6 divide-y divide-slate-200 rounded-xl border border-slate-200 bg-white">
+        <ul className="mt-6 divide-y divide-line rounded-xl border border-line bg-surface">
           {cargando ? (
-            <li className="p-4 text-sm text-slate-500">Cargando…</li>
+            <li className="p-4 text-sm text-ink-muted">Cargando…</li>
           ) : buses.length === 0 ? (
-            <li className="p-4 text-sm text-slate-500">Aún no hay buses.</li>
+            <li className="p-4 text-sm text-ink-muted">Aún no hay buses.</li>
           ) : (
             buses.map((b) => (
-              <li key={b.id} className="flex items-center justify-between p-4">
+              <li key={b.id} className="flex items-center justify-between p-4 hover:bg-subtle/50 transition">
                 <span className="text-sm">
                   <strong>{b.placa}</strong> · {b.numAsientos} asientos
                 </span>
                 <button
                   onClick={() => eliminar(b.id)}
-                  className="text-sm text-red-600 hover:underline"
+                  className="rounded-lg border border-danger/30 px-3 py-1 text-xs font-medium text-danger hover:bg-danger-subtle transition"
                 >
                   Eliminar
                 </button>

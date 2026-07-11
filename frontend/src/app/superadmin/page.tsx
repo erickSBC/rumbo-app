@@ -16,11 +16,6 @@ interface EmpresaFila {
   fechaRegistro: string | null;
 }
 
-/**
- * Panel del superadministrador (RF-16). Lista los tenants con su plan y estado
- * y permite suspender / reactivar. El SA no accede a datos operativos de los
- * tenants (§4.2) — este panel solo consume /api/superadmin/*.
- */
 export default function SuperadminPage() {
   const router = useRouter();
   const [empresas, setEmpresas] = useState<EmpresaFila[]>([]);
@@ -79,71 +74,80 @@ export default function SuperadminPage() {
 
   const badgeEstado = (estado: string) =>
     estado === "suspendida"
-      ? "bg-red-100 text-red-800"
+      ? "bg-danger-subtle text-danger"
       : estado === "prueba"
-      ? "bg-amber-100 text-amber-800"
-      : "bg-emerald-100 text-emerald-800";
+      ? "bg-warning-subtle text-warning"
+      : "bg-success-subtle text-success";
 
   return (
-    <main className="min-h-screen bg-slate-50 text-slate-900">
-      <section className="mx-auto max-w-5xl px-6 py-10">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold">Panel de Rumbo</h1>
-            <p className="text-sm text-slate-500">Empresas registradas en la plataforma</p>
+    <main className="min-h-screen bg-canvas text-ink">
+      {/* Topbar */}
+      <header className="sticky top-0 z-30 border-b border-line bg-surface/80 backdrop-blur-sm">
+        <div className="mx-auto flex max-w-5xl items-center justify-between px-6 py-3">
+          <div className="flex items-center gap-3">
+            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary font-bold text-white text-sm">R</span>
+            <div>
+              <p className="text-sm font-semibold">Panel de Rumbo</p>
+              <p className="text-xs text-ink-muted">Superadministrador</p>
+            </div>
           </div>
           <button
             onClick={() => signOut(auth)}
-            className="text-sm text-slate-600 hover:text-slate-900 hover:underline"
+            className="rounded-lg border border-line-strong px-3 py-1.5 text-xs font-medium text-ink-secondary hover:bg-subtle hover:text-ink transition"
           >
             Cerrar sesión
           </button>
         </div>
+      </header>
 
-        {error && <p className="mt-4 text-sm text-red-600">{error}</p>}
+      <section className="mx-auto max-w-5xl px-6 py-8">
+        <h1 className="text-2xl font-bold">Empresas registradas</h1>
+        <p className="text-sm text-ink-muted">Gestiona los tenants de la plataforma</p>
 
-        <div className="mt-6 overflow-x-auto rounded-xl border border-slate-200 bg-white">
+        {error && <p className="mt-4 rounded-lg bg-danger-subtle px-3 py-2 text-sm text-danger">{error}</p>}
+
+        <div className="mt-6 overflow-x-auto rounded-xl border border-line bg-surface shadow-sm">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-slate-200 text-left text-slate-500">
-                <th className="p-3 font-medium">Empresa</th>
-                <th className="p-3 font-medium">RUC</th>
-                <th className="p-3 font-medium">Plan</th>
-                <th className="p-3 font-medium">Estado</th>
-                <th className="p-3 font-medium">Registro</th>
-                <th className="p-3 font-medium text-right">Acción</th>
+              <tr className="border-b border-line">
+                <th className="p-3 text-left text-xs font-semibold uppercase tracking-wide text-ink-muted">Empresa</th>
+                <th className="p-3 text-left text-xs font-semibold uppercase tracking-wide text-ink-muted">RUC</th>
+                <th className="p-3 text-left text-xs font-semibold uppercase tracking-wide text-ink-muted">Plan</th>
+                <th className="p-3 text-left text-xs font-semibold uppercase tracking-wide text-ink-muted">Estado</th>
+                <th className="p-3 text-left text-xs font-semibold uppercase tracking-wide text-ink-muted">Registro</th>
+                <th className="p-3 text-right text-xs font-semibold uppercase tracking-wide text-ink-muted">Acción</th>
               </tr>
             </thead>
             <tbody>
               {cargando ? (
                 <tr>
-                  <td colSpan={6} className="p-4 text-slate-500">
+                  <td colSpan={6} className="p-4 text-ink-muted">
                     Cargando…
                   </td>
                 </tr>
               ) : (
                 empresas.map((e) => (
-                  <tr key={e.id} className="border-b border-slate-100">
+                  <tr key={e.id} className="border-b border-line last:border-0 hover:bg-subtle/50 transition">
                     <td className="p-3">
                       <p className="font-medium">{e.razonSocial}</p>
-                      <p className="text-xs text-slate-400">{e.email}</p>
+                      <p className="text-xs text-ink-muted">{e.email}</p>
                     </td>
-                    <td className="p-3">{e.ruc}</td>
+                    <td className="p-3 tabular">{e.ruc}</td>
                     <td className="p-3 capitalize">{e.planId}</td>
                     <td className="p-3">
                       <span className={`rounded-full px-2.5 py-0.5 text-xs font-medium ${badgeEstado(e.estado)}`}>
                         {e.estado}
                       </span>
                     </td>
-                    <td className="p-3">{fechaPe(e.fechaRegistro)}</td>
+                    <td className="p-3 tabular">{fechaPe(e.fechaRegistro)}</td>
                     <td className="p-3 text-right">
                       <button
                         onClick={() => cambiarEstado(e)}
                         disabled={ocupadoId === e.id}
-                        className={`rounded-lg border px-3 py-1.5 text-xs font-medium disabled:opacity-50 ${
+                        className={`rounded-lg border px-3 py-1.5 text-xs font-medium disabled:opacity-50 transition ${
                           e.estado === "suspendida"
-                            ? "border-emerald-300 text-emerald-700 hover:bg-emerald-50"
-                            : "border-red-300 text-red-700 hover:bg-red-50"
+                            ? "border-success/30 text-success hover:bg-success-subtle"
+                            : "border-danger/30 text-danger hover:bg-danger-subtle"
                         }`}
                       >
                         {ocupadoId === e.id

@@ -7,10 +7,6 @@ import { auth } from "@/lib/firebase";
 import { apiFetch } from "@/lib/api";
 import type { Usuario, Uso } from "@/types/domain";
 
-/**
- * Gestión de usuarios internos con rol vendedor (RF-06) + uso "X de Y usuarios"
- * (RF-03). El conteo incluye al admin.
- */
 export default function UsuariosPage() {
   const router = useRouter();
   const [usuarios, setUsuarios] = useState<Usuario[]>([]);
@@ -69,9 +65,9 @@ export default function UsuariosPage() {
   const enTope = uso ? uso.actual >= uso.max : false;
 
   return (
-    <main className="min-h-screen bg-slate-50 text-slate-900">
+    <main className="min-h-screen bg-canvas text-ink">
       <section className="mx-auto max-w-3xl px-6 py-10">
-        <a href="/dashboard" className="text-sm text-slate-500 hover:underline">
+        <a href="/dashboard" className="text-sm text-ink-muted hover:text-primary hover:underline transition">
           ← Volver al panel
         </a>
 
@@ -80,7 +76,7 @@ export default function UsuariosPage() {
           {uso && (
             <span
               className={`rounded-full px-3 py-1 text-sm font-medium ${
-                enTope ? "bg-amber-100 text-amber-800" : "bg-slate-100 text-slate-700"
+                enTope ? "bg-warning-subtle text-warning" : "bg-subtle text-ink-secondary"
               }`}
             >
               {uso.actual} de {uso.max} usuarios
@@ -89,42 +85,46 @@ export default function UsuariosPage() {
         </div>
 
         {enTope && (
-          <p className="mt-3 rounded-lg bg-amber-50 p-3 text-sm text-amber-800">
+          <p className="mt-3 rounded-lg bg-warning-subtle p-3 text-sm text-warning">
             Llegaste al límite de tu plan. Para agregar más usuarios, actualiza tu plan.
           </p>
         )}
 
-        <form onSubmit={crear} className="mt-6 grid gap-3 sm:grid-cols-3">
+        <form onSubmit={crear} className="mt-6 grid gap-3 sm:grid-cols-3 rounded-2xl border border-line bg-surface p-5">
           <Input label="Nombre" value={nombre} onChange={setNombre} />
           <Input label="Correo" type="email" value={email} onChange={setEmail} />
           <Input label="Contraseña" type="password" value={password} onChange={setPassword} />
           <button
             type="submit"
-            className="sm:col-span-3 rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white hover:bg-slate-700"
+            className="sm:col-span-3 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white hover:bg-primary-hover transition"
           >
             Agregar vendedor
           </button>
         </form>
 
-        {error && <p className="mt-3 text-sm text-red-600">{error}</p>}
+        {error && <p className="mt-3 rounded-lg bg-danger-subtle px-3 py-2 text-sm text-danger">{error}</p>}
 
-        <ul className="mt-6 divide-y divide-slate-200 rounded-xl border border-slate-200 bg-white">
+        <ul className="mt-6 divide-y divide-line rounded-xl border border-line bg-surface">
           {cargando ? (
-            <li className="p-4 text-sm text-slate-500">Cargando…</li>
+            <li className="p-4 text-sm text-ink-muted">Cargando…</li>
           ) : (
             usuarios.map((u) => (
-              <li key={u.id} className="flex items-center justify-between p-4">
+              <li key={u.id} className="flex items-center justify-between p-4 hover:bg-subtle/50 transition">
                 <span className="text-sm">
                   <strong>{u.nombre}</strong> · {u.email}{" "}
-                  <span className="text-slate-400">({u.rol})</span>
+                  <span className="text-ink-muted">({u.rol})</span>
                   {u.estado === "inactivo" && (
-                    <span className="ml-2 text-amber-700">— inactivo</span>
+                    <span className="ml-2 text-warning">— inactivo</span>
                   )}
                 </span>
                 {u.rol === "vendedor" && (
                   <button
                     onClick={() => alternarEstado(u)}
-                    className="text-sm text-slate-600 hover:underline"
+                    className={`rounded-lg border px-3 py-1 text-xs font-medium transition ${
+                      u.estado === "activo"
+                        ? "border-warning/30 text-warning hover:bg-warning-subtle"
+                        : "border-success/30 text-success hover:bg-success-subtle"
+                    }`}
                   >
                     {u.estado === "activo" ? "Desactivar" : "Activar"}
                   </button>
@@ -151,13 +151,13 @@ function Input({
 }) {
   return (
     <label className="block">
-      <span className="text-sm font-medium text-slate-700">{label}</span>
+      <span className="text-sm font-medium text-ink-secondary">{label}</span>
       <input
         type={type}
         value={value}
         onChange={(e) => onChange(e.target.value)}
         required
-        className="mt-1 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm"
+        className="mt-1.5 w-full rounded-lg border border-line-strong bg-surface px-3 py-2 text-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/30"
       />
     </label>
   );

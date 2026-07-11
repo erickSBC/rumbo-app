@@ -8,11 +8,6 @@ import { apiFetch } from "@/lib/api";
 import { MapaAsientos } from "@/components/MapaAsientos";
 import type { SalidaEnriquecida } from "@/types/domain";
 
-/**
- * Página del mapa de asientos de una salida (Día 5). Obtiene el meta de la
- * salida del backend (tenant-checked) para saber cuántos asientos dibujar, y el
- * empresaId del token para la suscripción en tiempo real del componente.
- */
 export default function MapaSalidaPage() {
   const router = useRouter();
   const params = useParams<{ salidaId: string }>();
@@ -27,7 +22,6 @@ export default function MapaSalidaPage() {
     const unsub = onAuthStateChanged(auth, async (user) => {
       if (!user) return router.replace("/login");
       try {
-        // empresaId y rol desde los claims del token (no del cliente arbitrariamente).
         const { claims } = await user.getIdTokenResult();
         setEmpresaId(claims.empresaId as string);
         setEsAdmin(claims.rol === "admin_empresa");
@@ -43,33 +37,35 @@ export default function MapaSalidaPage() {
 
   if (error) {
     return (
-      <main className="mx-auto max-w-2xl px-6 py-16">
-        <p className="text-red-600">Error: {error}</p>
-        <a href="/dashboard/salidas" className="mt-4 inline-block text-sm text-slate-600 hover:underline">
-          ← Volver a salidas
-        </a>
+      <main className="flex min-h-screen items-center justify-center bg-canvas">
+        <div className="text-center">
+          <p className="rounded-lg bg-danger-subtle px-4 py-3 text-sm text-danger">{error}</p>
+          <a href="/dashboard/salidas" className="mt-4 inline-block text-sm text-ink-muted hover:text-primary hover:underline transition">
+            ← Volver a salidas
+          </a>
+        </div>
       </main>
     );
   }
 
   if (!salida || !empresaId) {
     return (
-      <main className="mx-auto max-w-2xl px-6 py-16">
-        <p className="text-slate-500">Cargando…</p>
+      <main className="flex min-h-screen items-center justify-center bg-canvas">
+        <p className="text-sm text-ink-muted">Cargando…</p>
       </main>
     );
   }
 
   return (
-    <main className="min-h-screen bg-slate-50 text-slate-900">
+    <main className="min-h-screen bg-canvas text-ink">
       <section className="mx-auto max-w-3xl px-6 py-10">
         <div className="flex items-center justify-between">
-          <a href="/dashboard/salidas" className="text-sm text-slate-500 hover:underline">
+          <a href="/dashboard/salidas" className="text-sm text-ink-muted hover:text-primary hover:underline transition">
             ← Volver a salidas
           </a>
           <a
             href={`/dashboard/salidas/${salida.id}/manifiesto`}
-            className="text-sm font-medium text-slate-700 hover:underline"
+            className="rounded-lg bg-primary-subtle px-3 py-1.5 text-xs font-semibold text-primary hover:bg-primary hover:text-white transition"
           >
             Manifiesto →
           </a>
@@ -78,7 +74,7 @@ export default function MapaSalidaPage() {
         <h1 className="mt-3 text-2xl font-bold">
           {salida.rutaOrigen} → {salida.rutaDestino}
         </h1>
-        <p className="mt-1 text-sm text-slate-500">
+        <p className="mt-1 text-sm text-ink-muted">
           Bus {salida.busPlaca} · {salida.busNumAsientos} asientos · S/ {salida.precio} ·{" "}
           {new Date(salida.fechaHora).toLocaleString("es-PE", { timeZone: "America/Lima" })}
         </p>
@@ -93,7 +89,7 @@ export default function MapaSalidaPage() {
               puedeAnular={esAdmin}
             />
           ) : (
-            <p className="text-sm text-red-600">La salida no tiene un bus con asientos asignados.</p>
+            <p className="text-sm text-danger">La salida no tiene un bus con asientos asignados.</p>
           )}
         </div>
       </section>

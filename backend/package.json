@@ -11,6 +11,7 @@
     "seed:planes": "tsx scripts/seed-planes.ts",
     "seed:datos": "tsx scripts/seed-datos.ts",
     "seed:superadmin": "tsx scripts/seed-superadmin.ts",
+    "limpiar:manuales": "tsx scripts/limpiar-manuales.ts",
     "test:dia9": "tsx scripts/test-dia9.ts",
     "test:registro": "tsx scripts/test-registro.ts",
     "test:limites": "tsx scripts/test-limites.ts",
