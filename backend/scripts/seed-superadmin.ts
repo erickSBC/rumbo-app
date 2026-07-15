@@ -1,7 +1,7 @@
 /**
  * Seed del superadministrador (RF-16, §4.2). Idempotente.
  *
- * Crea (o reutiliza) la cuenta superadmin@rumbo-demo.com en Firebase Auth y le
+ * Crea (o reutiliza) la cuenta superadmin@rumbo.pe en Firebase Auth y le
  * asigna el custom claim { isSuperAdmin: true } SIN empresaId: el SA no
  * pertenece a ningún tenant y no tiene documento en `usuarios`.
  *
@@ -10,7 +10,7 @@
 import "dotenv/config";
 import { getAuth } from "../src/config/firebase.js";
 
-const EMAIL = "superadmin@rumbo-demo.com";
+const EMAIL = "superadmin@rumbo.pe";
 const PASSWORD = process.env.SUPERADMIN_PASSWORD ?? "rumbo123";
 
 async function main(): Promise<void> {

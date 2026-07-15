@@ -71,7 +71,7 @@ async function main(): Promise<void> {
 
   const adminUid = (await getAuth().getUserByEmail(flota.email as string)).uid;
   const adminToken = await idToken(adminUid);
-  const vendedorUid = (await getAuth().getUserByEmail("vendedor.flota@rumbo-demo.com")).uid;
+  const vendedorUid = (await getAuth().getUserByEmail("vendedor.flota@rumbo.pe")).uid;
   const vendedorToken = await idToken(vendedorUid);
 
   // Salida de Flota con asientos vendidos (5,11,12,13,14 del Día 6).

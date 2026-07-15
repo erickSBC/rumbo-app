@@ -65,10 +65,10 @@ async function main(): Promise<void> {
 
   // Resetea las empresas sembradas a su estado original.
   const resets: { email: string; planId: string; estado: string }[] = [
-    { email: "admin.flota@rumbo-demo.com", planId: "flota", estado: "prueba" },
-    { email: "admin.andino@rumbo-demo.com", planId: "flota", estado: "activa" },
-    { email: "admin.costanorte@rumbo-demo.com", planId: "flota", estado: "activa" },
-    { email: "admin.selvacentral@rumbo-demo.com", planId: "ruta", estado: "prueba" },
+    { email: "admin.flota@rumbo.pe", planId: "flota", estado: "prueba" },
+    { email: "admin.andino@rumbo.pe", planId: "flota", estado: "activa" },
+    { email: "admin.costanorte@rumbo.pe", planId: "flota", estado: "activa" },
+    { email: "admin.selvacentral@rumbo.pe", planId: "ruta", estado: "prueba" },
   ];
   for (const r of resets) {
     const snap = await db.collection("empresas").where("email", "==", r.email).limit(1).get();

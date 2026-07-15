@@ -89,7 +89,7 @@ async function cifrasReales(empresaId: string) {
 
 async function main(): Promise<void> {
   const db = getDb();
-  const flota = (await db.collection("empresas").where("email", "==", "admin.flota@rumbo-demo.com").limit(1).get()).docs[0].data();
+  const flota = (await db.collection("empresas").where("email", "==", "admin.flota@rumbo.pe").limit(1).get()).docs[0].data();
   const ruta = (await db.collection("empresas").where("planId", "==", "ruta").limit(1).get()).docs[0].data();
   const tokenFlota = await idTokenDe(flota.email as string);
 

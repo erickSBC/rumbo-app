@@ -47,14 +47,14 @@ async function empresaPorPlan(planId: string) {
 
 /** Crea (o reutiliza) un vendedor en la empresa vía el endpoint del Día 3. */
 async function asegurarVendedor(adminToken: string, empresaId: string): Promise<string> {
-  const email = "vendedor.flota@rumbo-demo.com";
+  const email = "vendedor.flota@rumbo.pe";
   try {
     return (await getAuth().getUserByEmail(email)).uid;
   } catch {
     const res = await fetch(`${API}/api/usuarios`, {
       method: "POST",
       headers: { "Content-Type": "application/json", Authorization: `Bearer ${adminToken}` },
-      body: JSON.stringify({ nombre: "Vendedor Demo", email, password: "demo123456" }),
+      body: JSON.stringify({ nombre: "Ricardo Salazar Ponce", email, password: "demo123456" }),
     });
     if (!res.ok) throw new Error(`No se pudo crear el vendedor: ${JSON.stringify(await res.json())}`);
     return (await getAuth().getUserByEmail(email)).uid;
@@ -72,7 +72,7 @@ async function asegurarSalida(empresaId: string) {
     const ref = db.collection("salidas").doc();
     await ref.set({
       id: ref.id, empresaId, rutaId: rutaSnap.docs[0].id, busId: busSnap.docs[0].id,
-      fechaHora: admin.firestore.Timestamp.now(), precio: 60, choferNombre: "Demo", estado: "programada",
+      fechaHora: admin.firestore.Timestamp.now(), precio: 60, choferNombre: "Aurelio Mendoza Ríos", estado: "programada",
     });
     salSnap = await db.collection("salidas").where("empresaId", "==", empresaId).limit(1).get();
   }

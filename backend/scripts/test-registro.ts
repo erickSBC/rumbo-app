@@ -22,8 +22,8 @@ const WEB_API_KEY = process.env.FIREBASE_WEB_API_KEY ?? "AIzaSyD2KSC_e2aDrLrLPuz
 
 const SAMPLE = {
   ruc: "20512345678",
-  razonSocial: "Transportes Demo Flota SAC",
-  email: "admin.flota@rumbo-demo.com",
+  razonSocial: "Transportes Cruz del Valle S.A.C.",
+  email: "admin.flota@rumbo.pe",
   password: "demo123456",
   planId: "flota",
 };

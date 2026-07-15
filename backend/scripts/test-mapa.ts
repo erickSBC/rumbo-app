@@ -96,7 +96,7 @@ async function salidaDePrueba(empresaId: string): Promise<{ salidaId: string; nu
       busId: busSnap.docs[0].id,
       fechaHora: admin.firestore.Timestamp.now(),
       precio: 60,
-      choferNombre: "Chofer Demo",
+      choferNombre: "Aurelio Mendoza Ríos",
       estado: "programada",
     });
     salidaId = ref.id;

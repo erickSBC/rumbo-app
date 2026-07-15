@@ -60,12 +60,12 @@ async function api(method: string, path: string, token: string, body?: unknown) 
 
 async function main(): Promise<void> {
   const db = getDb();
-  const selva = (await db.collection("empresas").where("email", "==", "admin.selvacentral@rumbo-demo.com").limit(1).get()).docs[0].data();
-  const flota = (await db.collection("empresas").where("email", "==", "admin.flota@rumbo-demo.com").limit(1).get()).docs[0].data();
+  const selva = (await db.collection("empresas").where("email", "==", "admin.selvacentral@rumbo.pe").limit(1).get()).docs[0].data();
+  const flota = (await db.collection("empresas").where("email", "==", "admin.flota@rumbo.pe").limit(1).get()).docs[0].data();
 
   const tokenSelva = await idTokenDe(selva.email as string);
   const tokenFlota = await idTokenDe(flota.email as string);
-  const tokenSA = await idTokenDe("superadmin@rumbo-demo.com");
+  const tokenSA = await idTokenDe("superadmin@rumbo.pe");
 
   // Marca para filtrar la auditoría nueva, con 2 min de margen: la auditoría
   // usa serverTimestamp y el reloj local puede ir adelantado (skew).
@@ -140,7 +140,7 @@ async function main(): Promise<void> {
   const saApp = initializeApp({ apiKey: WEB_API_KEY, authDomain: "rumboapp-264ca.firebaseapp.com", projectId: "rumboapp-264ca" }, "dia9-sa");
   const saAuth = getClientAuth(saApp);
   const saDb = getFirestore(saApp);
-  const saUid = (await getAuth().getUserByEmail("superadmin@rumbo-demo.com")).uid;
+  const saUid = (await getAuth().getUserByEmail("superadmin@rumbo.pe")).uid;
   await signInWithCustomToken(saAuth, await getAuth().createCustomToken(saUid, { isSuperAdmin: true }));
 
   const intentar = (col: string) =>

@@ -113,13 +113,13 @@ async function main(): Promise<void> {
   console.log("Localizando empresas Ruta y Flota…");
   const ruta = await obtenerEmpresaPorPlan("ruta", {
     ruc: "20487654321",
-    razonSocial: "Transportes Demo Ruta SAC",
-    email: "admin.ruta@rumbo-demo.com",
+    razonSocial: "Expreso Valle Sagrado S.A.C.",
+    email: "admin.ruta@rumbo.pe",
   });
   const flota = await obtenerEmpresaPorPlan("flota", {
     ruc: "20512345678",
-    razonSocial: "Transportes Demo Flota SAC",
-    email: "admin.flota@rumbo-demo.com",
+    razonSocial: "Transportes Cruz del Valle S.A.C.",
+    email: "admin.flota@rumbo.pe",
   });
   console.log(`   RUTA  → ${ruta.razonSocial} (${ruta.empresaId})`);
   console.log(`   FLOTA → ${flota.razonSocial} (${flota.empresaId})\n`);

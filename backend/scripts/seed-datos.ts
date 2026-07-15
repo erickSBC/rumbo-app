@@ -180,9 +180,9 @@ async function wipe(nombre: string, batcher: Batcher): Promise<number> {
 
 async function main(): Promise<void> {
   console.log("→ Asegurando empresas nuevas…");
-  await asegurarEmpresa({ razonSocial: "Turismo Andino Express S.A.C.", ruc: "20554839217", email: "admin.andino@rumbo-demo.com", planId: "flota", estado: "activa" });
-  await asegurarEmpresa({ razonSocial: "Expreso Costa Norte E.I.R.L.", ruc: "20487651203", email: "admin.costanorte@rumbo-demo.com", planId: "flota", estado: "activa" });
-  await asegurarEmpresa({ razonSocial: "Transportes Selva Central S.A.C.", ruc: "20601234785", email: "admin.selvacentral@rumbo-demo.com", planId: "ruta", estado: "prueba" });
+  await asegurarEmpresa({ razonSocial: "Turismo Andino Express S.A.C.", ruc: "20554839217", email: "admin.andino@rumbo.pe", planId: "flota", estado: "activa" });
+  await asegurarEmpresa({ razonSocial: "Expreso Costa Norte E.I.R.L.", ruc: "20487651203", email: "admin.costanorte@rumbo.pe", planId: "flota", estado: "activa" });
+  await asegurarEmpresa({ razonSocial: "Transportes Selva Central S.A.C.", ruc: "20601234785", email: "admin.selvacentral@rumbo.pe", planId: "ruta", estado: "prueba" });
 
   const planes = await cargarPlanes();
   const empresasSnap = await db.collection("empresas").get();
@@ -241,7 +241,7 @@ async function main(): Promise<void> {
       const nombre = nombreCompleto();
       await b.set(ref, {
         id: ref.id, empresaId: emp.id, nombre,
-        email: `vendedor${i + 1}.${emp.id.slice(0, 5).toLowerCase()}@rumbo-demo.com`,
+        email: `vendedor${i + 1}.${emp.id.slice(0, 5).toLowerCase()}@rumbo.pe`,
         rol: "vendedor", estado: chance(0.9) ? "activo" : "inactivo", seed: true,
       });
       ctx.usuarioIds.push(ref.id);
