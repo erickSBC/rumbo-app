@@ -20,6 +20,7 @@
     "test:venta": "tsx scripts/test-venta.ts",
     "test:dia7": "tsx scripts/test-dia7.ts",
     "test:ia": "tsx scripts/test-ia.ts",
+    "test:encomiendas": "tsx scripts/test-encomiendas.ts",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

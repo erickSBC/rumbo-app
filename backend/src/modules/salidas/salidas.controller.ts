@@ -109,10 +109,11 @@ export async function obtenerSalida(req: Request, res: Response): Promise<void> 
 }
 
 /**
- * GET /api/salidas/:id/manifiesto — RF-13. Manifiesto electrónico: cabecera de
- * la salida (ruta, fecha/hora, bus, chofer, empresa) + relación de pasajeros con
- * estado "vendido" (asiento, nombre, documento), contenido mínimo SUTRAN/MTC
- * (§3.3). Accesible por admin y vendedor del tenant.
+ * GET /api/salidas/:id/manifiesto — RF-13 + RF-19. Manifiesto electrónico:
+ * cabecera de la salida (ruta, fecha/hora, bus, chofer, empresa) + relación de
+ * pasajeros con estado "vendido" + declaración de carga (encomiendas a bordo:
+ * registrada o en_viaje) con total de bultos y peso, contenido mínimo
+ * SUTRAN/MTC (§3.3). Accesible por admin y vendedor del tenant.
  */
 export async function manifiestoSalida(req: Request, res: Response): Promise<void> {
   const empresaId = req.user!.empresaId!;
@@ -148,12 +149,36 @@ export async function manifiestoSalida(req: Request, res: Response): Promise<voi
     })
     .sort((a, b) => a.numAsiento - b.numAsiento);
 
+  // Declaración de carga (RF-19): encomiendas a bordo (registrada o en_viaje).
+  // El estado se filtra en memoria (dos igualdades: empresaId + salidaId).
+  const encSnap = await db
+    .collection("encomiendas")
+    .where("empresaId", "==", empresaId)
+    .where("salidaId", "==", salidaSnap.id)
+    .get();
+  const encomiendas = encSnap.docs
+    .map((d) => d.data())
+    .filter((e) => e.estado === "registrada" || e.estado === "en_viaje")
+    .map((e) => ({
+      codigo: e.codigo as string,
+      remitenteNombre: e.remitenteNombre as string,
+      destinatarioNombre: e.destinatarioNombre as string,
+      destinatarioDoc: e.destinatarioDoc as string,
+      descripcion: e.descripcion as string,
+      pesoKg: e.pesoKg as number,
+    }))
+    .sort((a, b) => a.codigo.localeCompare(b.codigo));
+  const pesoTotal = encomiendas.reduce((s, e) => s + e.pesoKg, 0);
+
   res.json({
     manifiesto: {
       empresa: { razonSocial, ruc },
       salida,
       pasajeros,
       totalPasajeros: pasajeros.length,
+      encomiendas,
+      totalBultos: encomiendas.length,
+      pesoTotal,
     },
   });
 }

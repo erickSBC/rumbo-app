@@ -26,7 +26,7 @@ async function seedPlanes(): Promise<void> {
     console.log(
       `  • ${plan.id.padEnd(9)} S/ ${plan.precioMensual}/mes  ` +
         `buses=${plan.maxBuses}  usuarios=${plan.maxUsuarios}  ` +
-        `IA=${plan.asistenteIA}`
+        `ENC=${plan.encomiendas}  IA=${plan.asistenteIA}`
     );
   }
 

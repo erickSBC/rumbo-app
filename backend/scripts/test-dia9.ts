@@ -75,14 +75,14 @@ async function main(): Promise<void> {
   console.log(`1) GUION DE DEMO — ${selva.razonSocial} (plan ${selva.planId})`);
   const q1 = await api("POST", "/api/ai/consulta", tokenSelva, { pregunta: "¿Cuánto vendí hoy?" });
   console.log(`   [plan ruta] pregunta al asistente → HTTP ${q1.status} "${q1.body.error ?? ""}"`);
-  const paso403 = q1.status === 403 && String(q1.body.error).includes("Actualiza a Flota");
+  const paso403 = q1.status === 403 && String(q1.body.error).includes("Actualiza a Terminal");
 
-  const cambio = await api("PUT", "/api/empresa/plan", tokenSelva, { planId: "flota" });
-  console.log(`   cambia a Flota → HTTP ${cambio.status} (avisos: ${JSON.stringify(cambio.body.avisos)})`);
+  const cambio = await api("PUT", "/api/empresa/plan", tokenSelva, { planId: "terminal" });
+  console.log(`   cambia a Terminal → HTTP ${cambio.status} (avisos: ${JSON.stringify(cambio.body.avisos)})`);
 
   const q2 = await api("POST", "/api/ai/consulta", tokenSelva, { pregunta: "¿Cuánto vendí hoy?" });
   const resp2 = String(q2.body.respuesta ?? q2.body.error ?? "");
-  console.log(`   [ya en flota] pregunta de nuevo → HTTP ${q2.status}`);
+  console.log(`   [ya en terminal] pregunta de nuevo → HTTP ${q2.status}`);
   console.log(`   🤖 ${resp2.split("\n")[0]}`);
   const pasoIA = q2.status === 200 && !!q2.body.respuesta && !resp2.includes("no está disponible");
 

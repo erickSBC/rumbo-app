@@ -107,6 +107,7 @@ export default function DashboardPage() {
           <NavCard href="/dashboard/buses" titulo="Buses" desc="Flota y asientos" icon={<BusIcon />} />
           <NavCard href="/dashboard/usuarios" titulo="Usuarios" desc="Vendedores del counter" icon={<UsersIcon />} />
           <NavCard href="/dashboard/salidas" titulo="Salidas" desc="Programación de salidas" icon={<CalendarIcon />} />
+          <NavCard href="/dashboard/encomiendas" titulo="Encomiendas" desc="Entrega y bodega de destino" icon={<PackageIcon />} />
           <NavCard href="/dashboard/reporte" titulo="Reporte del día" desc="Ventas y montos de hoy" icon={<ChartIcon />} />
           <NavCard href="/dashboard/asistente" titulo="Asistente IA" desc="Pregunta sobre tu operación" icon={<AIIcon />} />
         </nav>
@@ -181,6 +182,14 @@ function ChartIcon() {
   return (
     <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
       <path d="M18 20V10M12 20V4M6 20v-6" />
+    </svg>
+  );
+}
+function PackageIcon() {
+  return (
+    <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
+      <path d="M16.5 9.4 7.5 4.21M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" />
+      <path d="M3.27 6.96 12 12.01l8.73-5.05M12 22.08V12" />
     </svg>
   );
 }

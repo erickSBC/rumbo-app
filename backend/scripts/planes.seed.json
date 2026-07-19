@@ -6,6 +6,7 @@
     "precioAnual": 1490,
     "maxBuses": 5,
     "maxUsuarios": 3,
+    "encomiendas": false,
     "asistenteIA": false
   },
   {
@@ -15,7 +16,8 @@
     "precioAnual": 3990,
     "maxBuses": 25,
     "maxUsuarios": 15,
-    "asistenteIA": true
+    "encomiendas": true,
+    "asistenteIA": false
   },
   {
     "id": "terminal",
@@ -24,6 +26,7 @@
     "precioAnual": 8990,
     "maxBuses": 9999,
     "maxUsuarios": 9999,
+    "encomiendas": true,
     "asistenteIA": true
   }
 ]

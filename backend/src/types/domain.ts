@@ -13,6 +13,9 @@ export interface Plan {
   precioAnual: number;
   maxBuses: number;
   maxUsuarios: number;
+  /** Capacidad: módulo de encomiendas (Flota y Terminal). */
+  encomiendas: boolean;
+  /** Capacidad: asistente IA (exclusivo de Terminal). */
   asistenteIA: boolean;
 }
 
@@ -84,4 +87,37 @@ export interface Pasaje {
   fechaVenta: Date;
   precioPagado: number;
   estado: EstadoPasaje;
+}
+
+export type EstadoEncomienda =
+  | "registrada"
+  | "en_viaje"
+  | "en_destino"
+  | "entregada"
+  | "anulada";
+
+/**
+ * Encomienda que viaja en la bodega de una `Salida` (RF-17..RF-20).
+ * `codigo` es la guía única por tenant (formato ENC-{correlativo}); su
+ * correlativo se lleva en `contadores/{empresaId}` bajo transacción.
+ * Remitente y destinatario van embebidos (misma decisión que el pasajero).
+ */
+export interface Encomienda {
+  id: string;
+  empresaId: string;
+  salidaId: string;
+  codigo: string;
+  remitenteNombre: string;
+  remitenteDoc: string;
+  destinatarioNombre: string;
+  destinatarioDoc: string;
+  descripcion: string;
+  pesoKg: number;
+  precio: number;
+  registradoPor: string;
+  fechaRegistro: Date;
+  /** Documento de quien recogió; vacío hasta la entrega. */
+  entregadaA: string;
+  fechaEntrega: Date | null;
+  estado: EstadoEncomienda;
 }

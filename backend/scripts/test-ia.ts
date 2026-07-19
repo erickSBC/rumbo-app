@@ -2,11 +2,13 @@
  * Prueba real del Día 8: asistente IA (RF-15). Script de verificación manual.
  *
  * Demuestra:
- *   1. Empresa FLOTA (asistenteIA=true): 3 preguntas reales a Gemini; junto a
- *      cada respuesta se imprimen las cifras REALES de Firestore (mismo criterio
- *      del reporte del Día 7) para verificar coherencia.
+ *   1. Empresa con plan TERMINAL (asistenteIA=true): 3 preguntas reales a Gemini;
+ *      junto a cada respuesta se imprimen las cifras REALES de Firestore (mismo
+ *      criterio del reporte del Día 7) para verificar coherencia. Como el dataset
+ *      no tiene una empresa Terminal fija, se promueve temporalmente una empresa
+ *      al plan Terminal para la prueba y se revierte al terminar.
  *   2. Empresa RUTA (asistenteIA=false): misma pregunta → 403 con mensaje de
- *      upgrade (enforcement por plan, fragmento alt §6.4).
+ *      upgrade a Terminal (enforcement por plan, fragmento alt §6.4).
  *   3. Salvaguardas: pregunta >500 chars → 400; consultas 11.ª en un minuto → 429.
  *
  * El manejo de error de Gemini (mensaje neutro) se prueba aparte arrancando el
@@ -45,6 +47,16 @@ async function preguntar(token: string, pregunta: string) {
     body: JSON.stringify({ pregunta }),
   });
   return { status: res.status, body: (await res.json()) as { respuesta?: string; error?: string } };
+}
+
+/** Cambia el plan del tenant autenticado (para la promoción temporal a Terminal). */
+async function cambiarPlan(token: string, planId: string) {
+  const res = await fetch(`${API}/api/empresa/plan`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+    body: JSON.stringify({ planId }),
+  });
+  return { status: res.status, body: (await res.json()) as { avisos?: string[]; error?: string } };
 }
 
 /** Cifras reales de Firestore para contrastar (mismo criterio que el reporte). */
@@ -105,7 +117,7 @@ async function main(): Promise<void> {
   }
 
   // ---------------------------------------------------------------------------
-  console.log(`1) Empresa FLOTA (${flota.razonSocial}) — preguntas reales a Gemini\n`);
+  console.log(`1) Plan TERMINAL — ${flota.razonSocial} (promovida temporalmente) — preguntas reales a Gemini\n`);
   const reales = await cifrasReales(flota.id as string);
 
   const preguntas: { q: string; real: string }[] = [
@@ -114,25 +126,35 @@ async function main(): Promise<void> {
     { q: "¿Cuántas salidas tengo programadas para mañana?", real: `salidas reales mañana: ${reales.salidasManana}` },
   ];
 
-  let flotaOk = true;
-  for (const { q, real } of preguntas) {
-    const t0 = Date.now();
-    const r = await preguntar(tokenFlota, q);
-    const ms = Date.now() - t0;
-    console.log(`   ❓ ${q}  [HTTP ${r.status}, ${ms} ms]`);
-    console.log(`   🤖 ${(r.body.respuesta ?? r.body.error ?? "").split("\n").join("\n      ")}`);
-    console.log(`   📊 ${real}\n`);
-    flotaOk = flotaOk && r.status === 200 && !!r.body.respuesta &&
-      r.body.respuesta !== "El asistente no está disponible en este momento.";
+  // El asistente es exclusivo de Terminal: promovemos la empresa, probamos y
+  // revertimos su plan original en el finally (deja el dataset como estaba).
+  let terminalOk = true;
+  const planOriginal = flota.planId as string;
+  const promovida = await cambiarPlan(tokenFlota, "terminal");
+  console.log(`   promovida a Terminal → HTTP ${promovida.status}`);
+  try {
+    for (const { q, real } of preguntas) {
+      const t0 = Date.now();
+      const r = await preguntar(tokenFlota, q);
+      const ms = Date.now() - t0;
+      console.log(`   ❓ ${q}  [HTTP ${r.status}, ${ms} ms]`);
+      console.log(`   🤖 ${(r.body.respuesta ?? r.body.error ?? "").split("\n").join("\n      ")}`);
+      console.log(`   📊 ${real}\n`);
+      terminalOk = terminalOk && r.status === 200 && !!r.body.respuesta &&
+        r.body.respuesta !== "El asistente no está disponible en este momento.";
+    }
+  } finally {
+    const revert = await cambiarPlan(tokenFlota, planOriginal);
+    console.log(`   revierte a ${planOriginal} → HTTP ${revert.status}`);
   }
-  console.log(`   ${flotaOk ? "✅ Las 3 consultas respondieron con datos" : "❌ Alguna consulta falló"}\n`);
+  console.log(`   ${terminalOk ? "✅ Las 3 consultas respondieron con datos" : "❌ Alguna consulta falló"}\n`);
 
   // ---------------------------------------------------------------------------
   console.log(`2) Empresa RUTA (${ruta.razonSocial}, asistenteIA=false) — enforcement por plan`);
   const tokenRuta = await idTokenDe(ruta.email as string);
   const r403 = await preguntar(tokenRuta, "¿Cuánto vendí hoy?");
   console.log(`   HTTP ${r403.status} → "${r403.body.error ?? r403.body.respuesta}"`);
-  const upgradeOk = r403.status === 403 && (r403.body.error ?? "").includes("Actualiza a Flota");
+  const upgradeOk = r403.status === 403 && (r403.body.error ?? "").includes("Actualiza a Terminal");
   console.log(`   ${upgradeOk ? "✅ 403 con mensaje de upgrade (plan leído de Firestore)" : "❌ No dio el 403 esperado"}\n`);
 
   // ---------------------------------------------------------------------------
@@ -154,7 +176,7 @@ async function main(): Promise<void> {
   const salvaguardasOk = larga.status === 400 && excedida.status === 429;
   console.log(`   ${salvaguardasOk ? "✅ Límite de 500 chars y rate limit 10/min activos" : "❌ Alguna salvaguarda falló"}\n`);
 
-  const ok = flotaOk && upgradeOk && salvaguardasOk;
+  const ok = terminalOk && upgradeOk && salvaguardasOk;
   console.log(ok ? "✅ TODO OK (RF-15: IA + enforcement por plan + salvaguardas)" : "❌ Alguna verificación falló");
   process.exit(ok ? 0 : 1);
 }

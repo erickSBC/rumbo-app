@@ -12,6 +12,7 @@ import busesRouter from "./modules/flota/buses.routes.js";
 import usuariosRouter from "./modules/usuarios/usuarios.routes.js";
 import salidasRouter from "./modules/salidas/salidas.routes.js";
 import ventasRouter from "./modules/ventas/ventas.routes.js";
+import encomiendasRouter from "./modules/encomiendas/encomiendas.routes.js";
 import reportesRouter from "./modules/reportes/reportes.routes.js";
 import iaRouter from "./modules/ia/ia.routes.js";
 import empresasRouter from "./modules/empresas/empresas.routes.js";
@@ -42,6 +43,7 @@ export function createApp(): Express {
   app.use("/api/usuarios", usuariosRouter);
   app.use("/api/salidas", salidasRouter);
   app.use("/api/pasajes", ventasRouter);
+  app.use("/api/encomiendas", encomiendasRouter);
   app.use("/api/reportes", reportesRouter);
   app.use("/api/ai", iaRouter);
   app.use("/api/empresa", empresasRouter);

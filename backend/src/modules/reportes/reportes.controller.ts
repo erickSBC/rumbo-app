@@ -58,10 +58,30 @@ export async function reporteDia(req: Request, res: Response): Promise<void> {
     porRuta.set(rutaId, acc);
   }
 
+  // --- Desglose de encomiendas (RF-20): registradas hoy + pendientes ---
+  // El plan Ruta no tiene el módulo; entonces no habrá encomiendas y los totales
+  // quedan en cero (no se bloquea el reporte por capacidad).
+  const encSnap = await db.collection("encomiendas").where("empresaId", "==", empresaId).get();
+  const encomiendasDocs = encSnap.docs.map((d) => d.data());
+
+  const registradasHoy = encomiendasDocs.filter((e) => {
+    const t = (e.fechaRegistro as admin.firestore.Timestamp).toDate().getTime();
+    return e.estado !== "anulada" && t >= inicio.getTime() && t < fin.getTime();
+  });
+  const montoEncomiendas = registradasHoy.reduce((sum, e) => sum + (e.precio as number), 0);
+  const pendientesEntrega = encomiendasDocs.filter(
+    (e) => e.estado === "en_viaje" || e.estado === "en_destino"
+  ).length;
+
   res.json({
     fecha,
     totalPasajes,
     montoTotal,
     porRuta: [...porRuta.values()].sort((a, b) => b.monto - a.monto),
+    encomiendas: {
+      registradasHoy: registradasHoy.length,
+      montoEncomiendas,
+      pendientesEntrega,
+    },
   });
 }

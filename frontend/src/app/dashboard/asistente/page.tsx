@@ -99,7 +99,7 @@ export default function AsistentePage() {
               <div key={i} className="rounded-2xl border border-warning/30 bg-warning-subtle p-4">
                 <p className="text-sm font-medium text-warning">{m.texto}</p>
                 <p className="mt-1 text-sm text-warning/80">
-                  El asistente IA está disponible en los planes Flota y Terminal.
+                  El asistente IA es una capacidad exclusiva del plan Terminal.
                 </p>
                 <a
                   href="/dashboard/plan"

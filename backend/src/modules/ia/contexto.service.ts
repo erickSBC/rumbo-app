@@ -106,10 +106,11 @@ export async function obtenerContexto(empresaId: string): Promise<ContextoIA> {
     arr.reduce((s, p) => s + (p.precioPagado as number), 0);
 
   // --- Salidas y rutas del tenant (para top rutas, ocupación y agenda) ---
-  const [salidasSnap, rutasSnap, busesSnap] = await Promise.all([
+  const [salidasSnap, rutasSnap, busesSnap, encomiendasSnap] = await Promise.all([
     db.collection("salidas").where("empresaId", "==", empresaId).get(),
     db.collection("rutas").where("empresaId", "==", empresaId).get(),
     db.collection("buses").where("empresaId", "==", empresaId).get(),
+    db.collection("encomiendas").where("empresaId", "==", empresaId).get(),
   ]);
   const salidas = new Map(salidasSnap.docs.map((d) => [d.id, d.data()]));
   const rutas = new Map(rutasSnap.docs.map((d) => [d.id, d.data()]));
@@ -195,6 +196,34 @@ export async function obtenerContexto(empresaId: string): Promise<ContextoIA> {
   }
 
   lineas.push(`ANULACIONES DEL ÚLTIMO MES: ${anuladosMes.length} pasajes anulados.`);
+
+  // --- Encomiendas (RF-20): registradas hoy, pendientes y entregadas 7 días ---
+  const encomiendas = encomiendasSnap.docs.map((d) => d.data());
+  const regMs = (e: FirebaseFirestore.DocumentData) =>
+    (e.fechaRegistro as admin.firestore.Timestamp).toDate().getTime();
+  const encHoy = encomiendas.filter(
+    (e) => e.estado !== "anulada" && regMs(e) >= inicioHoy.getTime() && regMs(e) < finHoy.getTime()
+  );
+  const montoEncHoy = encHoy.reduce((s, e) => s + (e.precio as number), 0);
+  const pendientes = encomiendas
+    .filter((e) => e.estado === "en_viaje" || e.estado === "en_destino")
+    .sort((a, b) => regMs(a) - regMs(b));
+  const entregadas7d = encomiendas.filter((e) => {
+    const fe = e.fechaEntrega as admin.firestore.Timestamp | null;
+    return e.estado === "entregada" && fe && fe.toDate().getTime() >= hace7d;
+  });
+
+  lineas.push(
+    `ENCOMIENDAS REGISTRADAS HOY: ${encHoy.length} por ${soles(montoEncHoy)}.`
+  );
+  lineas.push(`ENCOMIENDAS PENDIENTES DE ENTREGA: ${pendientes.length}.`);
+  pendientes.slice(0, 5).forEach((e) => {
+    const dias = Math.floor((Date.now() - regMs(e)) / DIA);
+    lineas.push(
+      `  - ${e.codigo}: para ${e.destinatarioNombre} (doc. ${e.destinatarioDoc}), ${dias} día(s) en espera.`
+    );
+  });
+  lineas.push(`ENCOMIENDAS ENTREGADAS EN LOS ÚLTIMOS 7 DÍAS: ${entregadas7d.length}.`);
 
   return { razonSocial, tablaResumen: lineas.join("\n") };
 }

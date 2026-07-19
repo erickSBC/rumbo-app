@@ -63,12 +63,20 @@ export default function MapaSalidaPage() {
           <a href="/dashboard/salidas" className="text-sm text-ink-muted hover:text-primary hover:underline transition">
             ← Volver a salidas
           </a>
-          <a
-            href={`/dashboard/salidas/${salida.id}/manifiesto`}
-            className="rounded-lg bg-primary-subtle px-3 py-1.5 text-xs font-semibold text-primary hover:bg-primary hover:text-white transition"
-          >
-            Manifiesto →
-          </a>
+          <div className="flex items-center gap-2">
+            <a
+              href={`/dashboard/salidas/${salida.id}/encomiendas`}
+              className="rounded-lg border border-line-strong px-3 py-1.5 text-xs font-semibold text-ink-secondary hover:border-primary hover:text-primary transition"
+            >
+              Encomiendas →
+            </a>
+            <a
+              href={`/dashboard/salidas/${salida.id}/manifiesto`}
+              className="rounded-lg bg-primary-subtle px-3 py-1.5 text-xs font-semibold text-primary hover:bg-primary hover:text-white transition"
+            >
+              Manifiesto →
+            </a>
+          </div>
         </div>
 
         <h1 className="mt-3 text-2xl font-bold">

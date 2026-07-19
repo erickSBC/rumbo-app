@@ -7,11 +7,23 @@ import { auth } from "@/lib/firebase";
 import { apiFetch } from "@/lib/api";
 import type { SalidaEnriquecida } from "@/types/domain";
 
+interface EncomiendaCarga {
+  codigo: string;
+  remitenteNombre: string;
+  destinatarioNombre: string;
+  destinatarioDoc: string;
+  descripcion: string;
+  pesoKg: number;
+}
+
 interface Manifiesto {
   empresa: { razonSocial: string | null; ruc: string | null };
   salida: SalidaEnriquecida;
   pasajeros: { numAsiento: number; pasajeroNombre: string; pasajeroDoc: string }[];
   totalPasajeros: number;
+  encomiendas: EncomiendaCarga[];
+  totalBultos: number;
+  pesoTotal: number;
 }
 
 export default function ManifiestoPage() {
@@ -131,6 +143,47 @@ export default function ManifiestoPage() {
 
         <p className="mt-4 text-sm text-ink-secondary">
           Total de pasajeros: <strong className="text-ink">{m.totalPasajeros}</strong>
+        </p>
+
+        {/* Declaración de carga (RF-19): encomiendas a bordo */}
+        <h2 className="mt-8 border-b-2 border-ink pb-2 text-lg font-bold uppercase">Declaración de carga</h2>
+        <div className="mt-4 overflow-x-auto">
+          <table className="w-full border-collapse text-sm">
+            <thead>
+              <tr className="border-b-2 border-ink text-left">
+                <th className="py-2 pr-4 w-28 text-xs font-semibold uppercase tracking-wide text-ink-muted">Guía</th>
+                <th className="py-2 pr-4 text-xs font-semibold uppercase tracking-wide text-ink-muted">Remitente → Destinatario</th>
+                <th className="py-2 pr-4 text-xs font-semibold uppercase tracking-wide text-ink-muted">Contenido</th>
+                <th className="py-2 w-20 text-xs font-semibold uppercase tracking-wide text-ink-muted text-right">Peso</th>
+              </tr>
+            </thead>
+            <tbody>
+              {m.encomiendas.length === 0 ? (
+                <tr>
+                  <td colSpan={4} className="py-4 text-ink-muted">
+                    Sin encomiendas a bordo.
+                  </td>
+                </tr>
+              ) : (
+                m.encomiendas.map((e) => (
+                  <tr key={e.codigo} className="border-b border-line">
+                    <td className="py-1.5 pr-4 tabular">{e.codigo}</td>
+                    <td className="py-1.5 pr-4">
+                      {e.remitenteNombre} → {e.destinatarioNombre}{" "}
+                      <span className="text-ink-muted">(doc. {e.destinatarioDoc})</span>
+                    </td>
+                    <td className="py-1.5 pr-4">{e.descripcion}</td>
+                    <td className="py-1.5 tabular text-right">{e.pesoKg} kg</td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+
+        <p className="mt-4 text-sm text-ink-secondary">
+          Total de bultos: <strong className="text-ink">{m.totalBultos}</strong> · Peso total:{" "}
+          <strong className="text-ink tabular">{m.pesoTotal} kg</strong>
         </p>
       </section>
     </main>

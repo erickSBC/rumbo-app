@@ -11,6 +11,7 @@ interface Reporte {
   totalPasajes: number;
   montoTotal: number;
   porRuta: { ruta: string; pasajes: number; monto: number }[];
+  encomiendas?: { registradasHoy: number; montoEncomiendas: number; pendientesEntrega: number };
 }
 
 export default function ReportePage() {
@@ -64,10 +65,28 @@ export default function ReportePage() {
             <p className="mt-2 text-3xl font-bold tabular">{reporte.totalPasajes}</p>
           </div>
           <div className="rounded-2xl border border-line bg-surface p-6 shadow-sm">
-            <p className="text-xs font-semibold uppercase tracking-wide text-ink-muted">Monto total</p>
+            <p className="text-xs font-semibold uppercase tracking-wide text-ink-muted">Monto total (pasajes)</p>
             <p className="mt-2 text-3xl font-bold tabular text-primary">{soles(reporte.montoTotal)}</p>
           </div>
         </div>
+
+        {/* Desglose de encomiendas (RF-20) — solo si el plan incluye el módulo */}
+        {reporte.encomiendas && (
+          <div className="mt-4 grid gap-4 sm:grid-cols-3">
+            <div className="rounded-2xl border border-line bg-surface p-6 shadow-sm">
+              <p className="text-xs font-semibold uppercase tracking-wide text-ink-muted">Encomiendas hoy</p>
+              <p className="mt-2 text-3xl font-bold tabular">{reporte.encomiendas.registradasHoy}</p>
+            </div>
+            <div className="rounded-2xl border border-line bg-surface p-6 shadow-sm">
+              <p className="text-xs font-semibold uppercase tracking-wide text-ink-muted">Monto encomiendas</p>
+              <p className="mt-2 text-3xl font-bold tabular text-primary">{soles(reporte.encomiendas.montoEncomiendas)}</p>
+            </div>
+            <div className="rounded-2xl border border-line bg-surface p-6 shadow-sm">
+              <p className="text-xs font-semibold uppercase tracking-wide text-ink-muted">Pendientes de entrega</p>
+              <p className="mt-2 text-3xl font-bold tabular text-warning">{reporte.encomiendas.pendientesEntrega}</p>
+            </div>
+          </div>
+        )}
 
         <h2 className="mt-8 text-lg font-semibold">Por ruta</h2>
         <div className="mt-3 overflow-x-auto rounded-xl border border-line bg-surface">

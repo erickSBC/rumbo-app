@@ -11,6 +11,7 @@ export interface Plan {
   precioAnual: number;
   maxBuses: number;
   maxUsuarios: number;
+  encomiendas: boolean;
   asistenteIA: boolean;
 }
 
@@ -70,6 +71,32 @@ export interface Pasaje {
   fechaVenta: string; // ISO
   precioPagado: number;
   estado: "vendido" | "anulado";
+}
+
+export type EstadoEncomienda =
+  | "registrada"
+  | "en_viaje"
+  | "en_destino"
+  | "entregada"
+  | "anulada";
+
+export interface Encomienda {
+  id: string;
+  empresaId: string;
+  salidaId: string;
+  codigo: string;
+  remitenteNombre: string;
+  remitenteDoc: string;
+  destinatarioNombre: string;
+  destinatarioDoc: string;
+  descripcion: string;
+  pesoKg: number;
+  precio: number;
+  registradoPor: string;
+  fechaRegistro: string | null; // ISO
+  entregadaA: string;
+  fechaEntrega: string | null; // ISO
+  estado: EstadoEncomienda;
 }
 
 /** Uso actual vs. límite del plan (para "X de Y"). */
