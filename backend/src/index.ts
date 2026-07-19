@@ -5,7 +5,7 @@ import "dotenv/config";
 import { createApp } from "./app.js";
 import { initFirebase } from "./config/firebase.js";
 
-const PORT = Number(process.env.PORT ?? 4000);
+const PORT = Number(process.env.PORT ?? 8080);
 
 function main(): void {
   // Falla temprano y claro si la credencial no está disponible.
