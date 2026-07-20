@@ -92,6 +92,15 @@ const RUTAS_BASE: { origen: string; destino: string; duracionMin: number; precio
 ];
 const CONFIG_ASIENTOS = [40, 40, 44, 44, 44, 48, 50]; // ponderado hacia cama/semicama
 
+/** Contenidos típicos de encomienda en el transporte interprovincial peruano. */
+const DESCRIPCIONES_ENCOMIENDA = [
+  "Sobre con documentos", "Caja con repuestos de moto", "Bolsa con ropa",
+  "Caja de medicinas", "Paquete con laptop", "Caja con artesanías",
+  "Bolsa con útiles escolares", "Caja de conservas", "Repuestos de electrodomésticos",
+  "Muestras médicas", "Documentos notariales", "Caja con productos agrícolas",
+  "Encomienda de abarrotes", "Paquete con celular", "Caja con calzado",
+];
+
 function generarPlaca(usadas: Set<string>): string {
   const L = "ABCDEFGHJKLMNPRSTUVWXYZ";
   let placa = "";
@@ -130,7 +139,7 @@ class Batcher {
 }
 
 // ---------------------------------------------------------------------------
-interface Plan { maxBuses: number; maxUsuarios: number; }
+interface Plan { maxBuses: number; maxUsuarios: number; encomiendas: boolean; }
 interface EmpresaCtx {
   id: string;
   planId: string;
@@ -141,7 +150,13 @@ interface EmpresaCtx {
 async function cargarPlanes(): Promise<Map<string, Plan>> {
   const snap = await db.collection("planes").get();
   const m = new Map<string, Plan>();
-  snap.forEach((d) => m.set(d.id, { maxBuses: d.data().maxBuses, maxUsuarios: d.data().maxUsuarios }));
+  snap.forEach((d) =>
+    m.set(d.id, {
+      maxBuses: d.data().maxBuses,
+      maxUsuarios: d.data().maxUsuarios,
+      encomiendas: d.data().encomiendas === true,
+    })
+  );
   return m;
 }
 
@@ -200,6 +215,11 @@ async function main(): Promise<void> {
   await wipe("rutas", wipeBatch);
   await wipe("buses", wipeBatch);
   await wipe("pasajes", wipeBatch);
+  await wipe("encomiendas", wipeBatch);
+  // Los correlativos de guía se reinician con las encomiendas; más abajo se
+  // reescribe el contador de cada tenant con el último código sembrado, para
+  // que un registro nuevo en vivo continúe la numeración sin colisionar.
+  await wipe("contadores", wipeBatch);
   await wipe("auditoria", wipeBatch);
   // Vendedores sembrados (marcados con seed:true); preserva admins y usuarios reales.
   const seedUsers = await db.collection("usuarios").where("seed", "==", true).get();
@@ -211,13 +231,13 @@ async function main(): Promise<void> {
   const ahora = Date.now();
   const placasUsadas = new Set<string>();
   const b = new Batcher();
-  const conteo = { rutas: 0, buses: 0, vendedores: 0, salidas: 0, pasajes: 0, candados: 0, anulados: 0, auditoria: 0 };
+  const conteo = { rutas: 0, buses: 0, vendedores: 0, salidas: 0, pasajes: 0, candados: 0, anulados: 0, auditoria: 0, encomiendas: 0, encPendientes: 0 };
 
   const CHOFERES_POR_EMPRESA = 12;
 
   for (const empDoc of empresasSnap.docs) {
     const emp = empDoc.data();
-    const plan = planes.get(emp.planId) ?? { maxBuses: 5, maxUsuarios: 3 };
+    const plan = planes.get(emp.planId) ?? { maxBuses: 5, maxUsuarios: 3, encomiendas: false };
 
     // Tamaños objetivo por plan (acotados por los límites reales del plan).
     const tam = emp.planId === "terminal"
@@ -273,7 +293,9 @@ async function main(): Promise<void> {
     const choferes = Array.from({ length: CHOFERES_POR_EMPRESA }, () => nombreCompleto());
     const horas = [5, 6, 8, 10, 13, 15, 20, 21, 22, 23];
 
-    // Salidas (pasadas y futuras) con sus pasajes.
+    // Salidas (pasadas y futuras) con sus pasajes. Se guardan las no canceladas
+    // para colgarles encomiendas más abajo.
+    const salidasCreadas: { id: string; ms: number; esFutura: boolean }[] = [];
     const totalSal = tam.salPast + tam.salFut;
     for (let i = 0; i < totalSal; i++) {
       const esFutura = i >= tam.salPast;
@@ -293,6 +315,7 @@ async function main(): Promise<void> {
       });
       conteo.salidas++;
       if (cancelada) continue;
+      salidasCreadas.push({ id: salRef.id, ms: fechaHoraMs, esFutura });
 
       // Ocupación: alta en el pasado, más holgada a futuro (deja asientos libres).
       const frac = esFutura ? randInt(15, 55) / 100 : randInt(50, 92) / 100;
@@ -324,6 +347,71 @@ async function main(): Promise<void> {
       }
     }
 
+    // --- Encomiendas (RF-17..RF-20), solo si el plan incluye el módulo ---
+    if (plan.encomiendas && salidasCreadas.length > 0) {
+      const nEnc = emp.planId === "terminal" ? randInt(18, 26) : randInt(12, 18);
+      let correlativo = 0;
+
+      // La carga se concentra en pocas salidas: un manifiesto real lleva varios
+      // bultos, no uno suelto por salida. Se reservan 3 salidas futuras (para
+      // que el manifiesto de una salida próxima tenga contenido) y 6 pasadas.
+      const futuras = salidasCreadas.filter((s) => s.esFutura);
+      const pasadas = salidasCreadas.filter((s) => !s.esFutura);
+      const conCarga = [
+        ...sample(futuras, Math.min(3, futuras.length)),
+        ...sample(pasadas, Math.min(6, pasadas.length)),
+      ];
+
+      for (let i = 0; i < nEnc; i++) {
+        const sal = pick(conCarga.length ? conCarga : salidasCreadas);
+        correlativo++;
+        const codigo = `ENC-${String(correlativo).padStart(6, "0")}`;
+
+        // Estado coherente con la fecha de la salida: si aún no parte, sigue en
+        // counter; si ya viajó, en su mayoría fue entregada y algunas quedan
+        // pendientes en bodega (alimenta la pantalla de pendientes y la IA).
+        const estado = sal.esFutura
+          ? (chance(0.12) ? "anulada" : "registrada")
+          : chance(0.72)
+          ? "entregada"
+          : chance(0.5)
+          ? "en_destino"
+          : "en_viaje";
+
+        const pesoKg = Number((randInt(5, 250) / 10).toFixed(1)); // 0.5–25.0 kg
+        const precio = Math.max(8, Math.round(8 + (pesoKg * randInt(15, 30)) / 10));
+
+        // Registro: para salidas futuras, buena parte se registra HOY en horario
+        // de counter (así el reporte del día muestra movimiento real); el resto,
+        // días atrás. Para salidas pasadas, antes de que el bus partiera.
+        const registroMs = sal.esFutura
+          ? chance(0.45)
+            ? Math.min(ahora, inicioHoy.getTime() + randInt(7, 20) * 3600_000)
+            : ahora - randInt(1, 3) * DIA - randInt(0, 18) * 3600_000
+          : Math.min(ahora, sal.ms - randInt(2, 72) * 3600_000);
+        const entregada = estado === "entregada";
+
+        const ref = db.collection("encomiendas").doc();
+        await b.set(ref, {
+          id: ref.id, empresaId: emp.id, salidaId: sal.id, codigo,
+          remitenteNombre: nombreCompleto(), remitenteDoc: dni(),
+          destinatarioNombre: nombreCompleto(), destinatarioDoc: dni(),
+          descripcion: pick(DESCRIPCIONES_ENCOMIENDA), pesoKg, precio,
+          registradoPor: pick(ctx.usuarioIds),
+          fechaRegistro: T.fromMillis(registroMs),
+          entregadaA: entregada ? dni() : "",
+          fechaEntrega: entregada ? T.fromMillis(Math.min(sal.ms + randInt(2, 48) * 3600_000, ahora)) : null,
+          estado,
+        });
+        conteo.encomiendas++;
+        if (estado === "en_viaje" || estado === "en_destino") conteo.encPendientes++;
+      }
+
+      // Contador del tenant al día: una guía registrada en vivo durante la demo
+      // continúa la serie (ENC-000019, …) en vez de chocar con las sembradas.
+      await b.set(db.collection("contadores").doc(emp.id), { encomiendas: correlativo });
+    }
+
     // Auditoría de muestra.
     for (let i = 0; i < 6; i++) {
       const ref = db.collection("auditoria").doc();
@@ -348,6 +436,7 @@ async function main(): Promise<void> {
   console.log(`   salidas          : ${conteo.salidas}`);
   console.log(`   pasajes          : ${conteo.pasajes} (anulados: ${conteo.anulados})`);
   console.log(`   candados asiento : ${conteo.candados}`);
+  console.log(`   encomiendas      : ${conteo.encomiendas} (pendientes de entrega: ${conteo.encPendientes})`);
   console.log(`   auditoría        : ${conteo.auditoria}`);
 }
 

@@ -23,7 +23,12 @@
       "Bash(echo \"=== git log reciente ===\" && git log --oneline -8 2>/dev/null; echo \"=== buscar skill frontend-design ===\" && find . -iname \"*frontend-design*\" -not -path \"*/node_modules/*\" 2>/dev/null; ls -d .claude/skills 2>/dev/null && ls .claude/skills 2>/dev/null; ls \"$HOME/.claude/skills\" 2>/dev/null | head; echo \"=== frontend estructura estilo ===\" && ls frontend/ && echo \"--- app ---\" && ls frontend/src/app/)",
       "Bash(sed -i 's/Transportes Demo Ruta SAC/Expreso Valle Sagrado S.A.C./; s/Transportes Demo Flota SAC/Transportes Cruz del Valle S.A.C./' test-limites.ts)",
       "Bash(sed -i 's/Chofer Demo/Aurelio Mendoza Ríos/' test-mapa.ts)",
-      "Bash(sed -i 's/Vendedor Demo/Ricardo Salazar Ponce/; s/choferNombre: \"Demo\"/choferNombre: \"Aurelio Mendoza Ríos\"/' test-venta.ts)"
+      "Bash(sed -i 's/Vendedor Demo/Ricardo Salazar Ponce/; s/choferNombre: \"Demo\"/choferNombre: \"Aurelio Mendoza Ríos\"/' test-venta.ts)",
+      "Bash(curl -s -m 25 \"https://rumbo-backend.ashysand-85cfe4d1.southcentralus.azurecontainerapps.io/api/planes\")",
+      "Bash(curl -s -o /dev/null -w '%{http_code}' -m 25 https://rumbo-backend.ashysand-85cfe4d1.southcentralus.azurecontainerapps.io/api/encomiendas/pendientes)",
+      "Bash(curl -s -o /dev/null -w '%{http_code}' -m 25 -X POST https://rumbo-backend.ashysand-85cfe4d1.southcentralus.azurecontainerapps.io/api/pasajes)",
+      "Bash(curl -s -o /tmp/r1 -w 'HTTP %{http_code}\\\\n' -m 25 https://rumbo-backend.ashysand-85cfe4d1.southcentralus.azurecontainerapps.io/api/encomiendas/pendientes)",
+      "Bash(curl -s -o /tmp/r2 -w 'HTTP %{http_code}\\\\n' -m 25 -X POST https://rumbo-backend.ashysand-85cfe4d1.southcentralus.azurecontainerapps.io/api/pasajes)"
     ]
   }
 }

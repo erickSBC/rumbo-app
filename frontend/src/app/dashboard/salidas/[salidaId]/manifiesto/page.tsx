@@ -183,7 +183,7 @@ export default function ManifiestoPage() {
 
         <p className="mt-4 text-sm text-ink-secondary">
           Total de bultos: <strong className="text-ink">{m.totalBultos}</strong> · Peso total:{" "}
-          <strong className="text-ink tabular">{m.pesoTotal} kg</strong>
+          <strong className="text-ink tabular">{m.pesoTotal.toFixed(1)} kg</strong>
         </p>
       </section>
     </main>

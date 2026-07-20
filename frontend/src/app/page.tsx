@@ -17,6 +17,60 @@ function precioSoles(monto: number): string {
   return `S/ ${monto.toLocaleString("es-PE")}`;
 }
 
+/**
+ * Valor centinela de "sin tope" en la colección `planes`. OJO: es solo una
+ * decisión de PRESENTACIÓN — el backend sigue leyendo y aplicando el 9999 real
+ * como límite; aquí únicamente se muestra como "Ilimitado".
+ */
+const LIMITE_SIN_TOPE = 9999;
+
+/** "5" | "Ilimitado" — para la tabla comparativa. */
+function limite(valor: number): string {
+  return valor >= LIMITE_SIN_TOPE ? "Ilimitado" : valor.toLocaleString("es-PE");
+}
+
+/** "Hasta 5 buses" | "Buses ilimitados" — para las tarjetas. */
+function limiteFrase(valor: number, sustantivo: string): string {
+  if (valor >= LIMITE_SIN_TOPE) {
+    return `${sustantivo[0].toUpperCase()}${sustantivo.slice(1)} ilimitados`;
+  }
+  return `Hasta ${valor.toLocaleString("es-PE")} ${sustantivo}`;
+}
+
+/**
+ * Características de cada plan. Lo que varía entre planes sale de los datos
+ * (límites y los flags `encomiendas` / `asistenteIA`); el resto es común a
+ * todos y corresponde a funcionalidades que el sistema realmente tiene.
+ */
+function caracteristicas(plan: Plan): { texto: string; incluido: boolean }[] {
+  return [
+    { texto: limiteFrase(plan.maxBuses, "buses"), incluido: true },
+    { texto: limiteFrase(plan.maxUsuarios, "usuarios"), incluido: true },
+    { texto: "Rutas y salidas ilimitadas", incluido: true },
+    { texto: "Mapa de asientos en tiempo real", incluido: true },
+    { texto: "Venta con bloqueo anti-doble venta", incluido: true },
+    { texto: "Manifiesto electrónico imprimible", incluido: true },
+    { texto: "Reporte de ventas del día", incluido: true },
+    { texto: "Roles de administrador y vendedor", incluido: true },
+    { texto: "Módulo de encomiendas con guías", incluido: plan.encomiendas },
+    { texto: "Asistente con inteligencia artificial", incluido: plan.asistenteIA },
+  ];
+}
+
+/** Filas de la tabla comparativa (booleano → ✓/—, texto → se imprime). */
+const COMPARATIVA: { etiqueta: string; valor: (p: Plan) => boolean | string }[] = [
+  { etiqueta: "Buses", valor: (p) => limite(p.maxBuses) },
+  { etiqueta: "Usuarios", valor: (p) => limite(p.maxUsuarios) },
+  { etiqueta: "Rutas y salidas", valor: () => "Ilimitadas" },
+  { etiqueta: "Mapa de asientos en tiempo real", valor: () => true },
+  { etiqueta: "Bloqueo anti-doble venta", valor: () => true },
+  { etiqueta: "Manifiesto electrónico", valor: () => true },
+  { etiqueta: "Reporte de ventas del día", valor: () => true },
+  { etiqueta: "Roles y permisos", valor: () => true },
+  { etiqueta: "Módulo de encomiendas", valor: (p) => p.encomiendas },
+  { etiqueta: "Asistente con IA", valor: (p) => p.asistenteIA },
+];
+
 function Logo() {
   return (
     <span className="flex items-center gap-2">
@@ -30,6 +84,11 @@ function Logo() {
 
 export default async function Home() {
   const planes = await getPlanes();
+
+  // Nombres derivados del catálogo: si mañana cambias qué plan incluye qué,
+  // el FAQ se actualiza solo (no queda una afirmación falsa escrita a mano).
+  const planesCon = (tiene: (p: Plan) => boolean) =>
+    planes.filter(tiene).map((p) => p.nombre).join(" y ") || "los planes superiores";
 
   return (
     <main className="min-h-screen bg-canvas text-ink">
@@ -191,22 +250,20 @@ export default async function Home() {
                     </p>
                     <p className="text-sm text-ink-muted">o {precioSoles(plan.precioAnual)} al año</p>
 
-                    <ul className="mt-6 space-y-3 text-sm text-ink-secondary">
-                      <li className="flex items-center gap-2">
-                        <Check /> Hasta {plan.maxBuses.toLocaleString("es-PE")} buses
-                      </li>
-                      <li className="flex items-center gap-2">
-                        <Check /> Hasta {plan.maxUsuarios.toLocaleString("es-PE")} usuarios
-                      </li>
-                      <li className="flex items-center gap-2">
-                        {plan.asistenteIA ? (
-                          <>
-                            <Check /> Asistente con inteligencia artificial
-                          </>
-                        ) : (
-                          <span className="text-ink-muted">— Sin asistente IA</span>
-                        )}
-                      </li>
+                    <ul className="mt-6 space-y-2.5 text-sm">
+                      {caracteristicas(plan).map((c) => (
+                        <li
+                          key={c.texto}
+                          className={`flex items-start gap-2 ${
+                            c.incluido ? "text-ink-secondary" : "text-ink-muted"
+                          }`}
+                        >
+                          {c.incluido ? <Check /> : <Dash />}
+                          <span className={c.incluido ? "" : "line-through decoration-line-strong"}>
+                            {c.texto}
+                          </span>
+                        </li>
+                      ))}
                     </ul>
 
                     <Link
@@ -224,6 +281,148 @@ export default async function Home() {
               })}
             </div>
           )}
+
+          {/* Tabla comparativa: la misma fuente de datos que las tarjetas */}
+          {planes.length > 0 && (
+            <div className="mt-14">
+              <h3 className="text-center text-lg font-semibold">Comparación detallada</h3>
+              <div className="mt-6 overflow-x-auto rounded-2xl border border-line bg-surface">
+                <table className="w-full min-w-[34rem] text-sm">
+                  <thead>
+                    <tr className="border-b border-line">
+                      <th className="p-4 text-left text-xs font-semibold uppercase tracking-wide text-ink-muted">
+                        Funcionalidad
+                      </th>
+                      {planes.map((p) => (
+                        <th
+                          key={p.id}
+                          className="p-4 text-center text-xs font-semibold uppercase tracking-wide text-ink-muted"
+                        >
+                          {p.nombre}
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {COMPARATIVA.map((fila) => (
+                      <tr key={fila.etiqueta} className="border-b border-line last:border-0">
+                        <td className="p-4 text-ink-secondary">{fila.etiqueta}</td>
+                        {planes.map((p) => {
+                          const v = fila.valor(p);
+                          return (
+                            <td key={p.id} className="p-4 text-center">
+                              {typeof v === "string" ? (
+                                <span className="font-medium tabular">{v}</span>
+                              ) : v ? (
+                                <span className="inline-flex justify-center text-primary">
+                                  <Check />
+                                </span>
+                              ) : (
+                                <span className="inline-flex justify-center">
+                                  <Dash />
+                                </span>
+                              )}
+                            </td>
+                          );
+                        })}
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+        </div>
+      </section>
+
+      {/* Quiénes somos */}
+      <section className="mx-auto max-w-6xl px-6 py-20">
+        <div className="grid gap-12 lg:grid-cols-2 lg:items-center">
+          <div>
+            <h2 className="text-sm font-semibold uppercase tracking-wide text-primary">Quiénes somos</h2>
+            <p className="mt-2 text-2xl font-bold sm:text-3xl">
+              Software hecho para el transporte interprovincial peruano
+            </p>
+            <p className="mt-4 text-ink-secondary leading-relaxed">
+              Rumbo nace de un problema concreto: muchas empresas de transporte siguen llevando la
+              venta de pasajes en cuadernos y hojas de cálculo. El resultado son asientos vendidos
+              dos veces, manifiestos armados a mano contra el reloj y encomiendas anotadas en un
+              cuaderno aparte, sin rastro de quién recibió el paquete.
+            </p>
+            <p className="mt-4 text-ink-secondary leading-relaxed">
+              Construimos una herramienta que resuelve exactamente eso: un counter que no puede
+              sobrevender, un manifiesto que se imprime en un clic y encomiendas con guía y control
+              de entrega. Sin instalaciones y sin cambiar cómo trabaja tu equipo.
+            </p>
+          </div>
+
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Pilar
+              titulo="Enfocados en el rubro"
+              texto="No es un ERP genérico adaptado: rutas, salidas, asientos, manifiesto y encomiendas son el modelo del producto."
+            />
+            <Pilar
+              titulo="Tus datos, solo tuyos"
+              texto="Cada empresa opera aislada. El acceso se valida en el servidor y en la base de datos, no solo en la pantalla."
+            />
+            <Pilar
+              titulo="Sin instalaciones"
+              texto="Funciona en el navegador del counter. Sin servidores propios ni mantenimiento de tu lado."
+            />
+            <Pilar
+              titulo="Empiezas hoy"
+              texto="Registras tu empresa, cargas tus rutas y buses, y vendes el primer pasaje el mismo día."
+            />
+          </div>
+        </div>
+      </section>
+
+      {/* Preguntas frecuentes */}
+      <section className="bg-surface border-y border-line">
+        <div className="mx-auto max-w-3xl px-6 py-20">
+          <div className="text-center">
+            <h2 className="text-sm font-semibold uppercase tracking-wide text-primary">Preguntas frecuentes</h2>
+            <p className="mt-2 text-2xl font-bold sm:text-3xl">Lo que suelen preguntarnos</p>
+          </div>
+
+          <div className="mt-10 divide-y divide-line rounded-2xl border border-line">
+            <Faq
+              pregunta="¿Necesito tarjeta de crédito para probar?"
+              respuesta="No. La prueba dura 14 días y no se solicita tarjeta ni se cobra nada durante ese período."
+            />
+            <Faq
+              pregunta="¿Puedo cambiar de plan más adelante?"
+              respuesta="Sí, desde tu panel y cuando quieras; los límites del nuevo plan aplican de inmediato. Si bajas a un plan menor no se borra información: conservas todos tus datos, pero no podrás crear nuevos registros hasta volver por debajo del límite."
+            />
+            <Faq
+              pregunta="¿Los datos de mi empresa están separados de los de otras?"
+              respuesta="Sí. Cada empresa opera completamente aislada: toda consulta se filtra por empresa en el servidor y las reglas de la base de datos rechazan cualquier intento de acceso cruzado."
+            />
+            <Faq
+              pregunta="¿Qué pasa si dos vendedores venden el mismo asiento al mismo tiempo?"
+              respuesta="No puede ocurrir. Cada venta se confirma dentro de una transacción atómica sobre el asiento: si dos vendedores intentan el mismo asiento a la vez, solo una venta se confirma y la otra recibe un aviso para elegir otro asiento."
+            />
+            <Faq
+              pregunta="¿El manifiesto sirve para SUTRAN/MTC?"
+              respuesta="Incluye el contenido mínimo exigido: datos del vehículo, del conductor, la relación de pasajeros con su documento y la declaración de carga con las encomiendas a bordo. Se imprime directamente desde el navegador."
+            />
+            <Faq
+              pregunta="¿En qué planes está el módulo de encomiendas?"
+              respuesta={`El módulo de encomiendas —con guía única por envío, despacho por salida y entrega validando el documento de quien recoge— está disponible en ${planesCon((p) => p.encomiendas)}.`}
+            />
+            <Faq
+              pregunta="¿Y el asistente con inteligencia artificial?"
+              respuesta={`El asistente, que responde preguntas sobre tu operación en lenguaje natural con los datos reales de tu empresa, es exclusivo del plan ${planesCon((p) => p.asistenteIA)}.`}
+            />
+            <Faq
+              pregunta="¿Emiten comprobantes electrónicos ante SUNAT?"
+              respuesta="Todavía no. La facturación electrónica está en la hoja de ruta, pero no forma parte de esta versión."
+            />
+            <Faq
+              pregunta="¿Necesito instalar algo o tener un servidor?"
+              respuesta="No. Rumbo funciona en el navegador desde cualquier computadora del counter. Nosotros nos encargamos de la infraestructura, las copias de seguridad y las actualizaciones."
+            />
+          </div>
         </div>
       </section>
 
@@ -233,8 +432,8 @@ export default async function Home() {
         <div className="relative mx-auto max-w-6xl px-6 py-20 text-center">
           <h2 className="text-2xl font-bold sm:text-3xl">Lleva tu empresa al siguiente nivel</h2>
           <p className="mt-3 text-ink-secondary max-w-xl mx-auto">
-            Únete a las empresas de transporte que ya gestionan sus operaciones con Rumbo.
-            Sin tarjeta, sin compromiso.
+            Prueba Rumbo 14 días con tu operación real: carga tus rutas, vende en el mapa de
+            asientos y mira el manifiesto listo. Sin tarjeta, sin compromiso.
           </p>
           <Link
             href="/registro"
@@ -272,9 +471,51 @@ function FeatureCard({ icon, title, description }: { icon: React.ReactNode; titl
   );
 }
 
+function Pilar({ titulo, texto }: { titulo: string; texto: string }) {
+  return (
+    <div className="rounded-2xl border border-line bg-surface p-5">
+      <h3 className="font-semibold">{titulo}</h3>
+      <p className="mt-1.5 text-sm text-ink-secondary leading-relaxed">{texto}</p>
+    </div>
+  );
+}
+
+/** Ítem de FAQ desplegable. Usa <details> nativo: funciona sin JavaScript. */
+function Faq({ pregunta, respuesta }: { pregunta: string; respuesta: string }) {
+  return (
+    <details className="group px-5 py-4 [&_summary::-webkit-details-marker]:hidden">
+      <summary className="flex cursor-pointer items-center justify-between gap-4 font-medium">
+        {pregunta}
+        <svg
+          className="h-5 w-5 shrink-0 text-ink-muted transition-transform group-open:rotate-180"
+          viewBox="0 0 20 20"
+          fill="currentColor"
+          aria-hidden
+        >
+          <path
+            fillRule="evenodd"
+            d="M5.3 7.3a1 1 0 0 1 1.4 0L10 10.59l3.3-3.3a1 1 0 1 1 1.4 1.42l-4 4a1 1 0 0 1-1.4 0l-4-4a1 1 0 0 1 0-1.42Z"
+            clipRule="evenodd"
+          />
+        </svg>
+      </summary>
+      <p className="mt-3 text-sm text-ink-secondary leading-relaxed">{respuesta}</p>
+    </details>
+  );
+}
+
+/** Marca de "no incluido" en el plan. */
+function Dash() {
+  return (
+    <svg className="mt-0.5 h-4 w-4 shrink-0 text-ink-muted" viewBox="0 0 20 20" fill="currentColor" aria-hidden>
+      <path fillRule="evenodd" d="M4 10a1 1 0 0 1 1-1h10a1 1 0 1 1 0 2H5a1 1 0 0 1-1-1Z" clipRule="evenodd" />
+    </svg>
+  );
+}
+
 function Check() {
   return (
-    <svg className="h-4 w-4 shrink-0 text-primary" viewBox="0 0 20 20" fill="currentColor" aria-hidden>
+    <svg className="mt-0.5 h-4 w-4 shrink-0 text-primary" viewBox="0 0 20 20" fill="currentColor" aria-hidden>
       <path
         fillRule="evenodd"
         d="M16.7 5.3a1 1 0 0 1 0 1.4l-7.5 7.5a1 1 0 0 1-1.4 0L3.3 9.7a1 1 0 1 1 1.4-1.4l3.3 3.29 6.8-6.8a1 1 0 0 1 1.4 0Z"

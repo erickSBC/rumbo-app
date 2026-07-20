@@ -9,6 +9,19 @@ import type { Plan } from "@/types/domain";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000";
 
+/**
+ * Centinela de "sin tope" en `planes`. Solo afecta la PRESENTACIÓN: el backend
+ * sigue aplicando el valor real (9999) como límite.
+ */
+const LIMITE_SIN_TOPE = 9999;
+
+function limiteFrase(valor: number, sustantivo: string): string {
+  if (valor >= LIMITE_SIN_TOPE) {
+    return `${sustantivo[0].toUpperCase()}${sustantivo.slice(1)} ilimitados`;
+  }
+  return `Hasta ${valor.toLocaleString("es-PE")} ${sustantivo}`;
+}
+
 export default function PlanPage() {
   const router = useRouter();
   const [planes, setPlanes] = useState<Plan[]>([]);
@@ -102,10 +115,19 @@ export default function PlanPage() {
                 </p>
                 <ul className="mt-4 space-y-2 text-sm text-ink-secondary">
                   <li className="flex items-center gap-2">
-                    <Check /> Hasta {p.maxBuses.toLocaleString("es-PE")} buses
+                    <Check /> {limiteFrase(p.maxBuses, "buses")}
                   </li>
                   <li className="flex items-center gap-2">
-                    <Check /> Hasta {p.maxUsuarios.toLocaleString("es-PE")} usuarios
+                    <Check /> {limiteFrase(p.maxUsuarios, "usuarios")}
+                  </li>
+                  <li className="flex items-center gap-2">
+                    {p.encomiendas ? (
+                      <>
+                        <Check /> Módulo de encomiendas
+                      </>
+                    ) : (
+                      <span className="text-ink-muted">— Sin módulo de encomiendas</span>
+                    )}
                   </li>
                   <li className="flex items-center gap-2">
                     {p.asistenteIA ? (
